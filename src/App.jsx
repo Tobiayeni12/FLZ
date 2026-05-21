@@ -46,8 +46,10 @@ export default function App() {
   const [savedEntry, setSavedEntry]   = useState(false)
   const pendingEntryRef               = useRef(null)
   const [pendingEntry, setPendingEntry] = useState(null)
+  const screenRef                     = useRef('onboarding')
 
   useEffect(() => { pendingEntryRef.current = pendingEntry }, [pendingEntry])
+  useEffect(() => { screenRef.current = screen }, [screen])
 
   // ── Boot: check session + listen for auth changes ────────────────────────
   useEffect(() => {
@@ -65,8 +67,19 @@ export default function App() {
       setUser(newUser)
 
       if (event === 'SIGNED_IN' && newUser) {
+        // Detect real sign-in vs silent session restore on page reload
+        const url = window.location.href
+        const isOAuthCallback = url.includes('access_token') || url.includes('code=')
+        const isFromAuthScreen = screenRef.current === 'auth'
+
         window.history.replaceState({}, document.title, window.location.pathname)
-        setScreen(pendingEntryRef.current ? 'results' : 'history')
+
+        if (pendingEntryRef.current) {
+          setScreen('results')
+        } else if (isOAuthCallback || isFromAuthScreen) {
+          setScreen('history')
+        }
+        // else: session restored on page reload — stay on current screen
       }
 
       if (event === 'SIGNED_OUT') {
