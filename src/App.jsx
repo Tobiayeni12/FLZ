@@ -31,6 +31,24 @@ export default function App() {
     setUserName(name)
   }
 
+  // ── Plan config ──────────────────────────────────────────────────────────
+  const DAILY_LIMIT = 10
+  const isPro = false // will be wired to Stripe/Supabase profile later
+
+  // ── Daily assessment counter ──────────────────────────────────────────────
+  const [assessmentsToday, setAssessmentsToday] = useState(() => {
+    const stored = JSON.parse(localStorage.getItem('flz-assessments') || '{}')
+    const today = new Date().toISOString().split('T')[0]
+    return stored.date === today ? stored.count : 0
+  })
+
+  function incrementAssessments() {
+    const today = new Date().toISOString().split('T')[0]
+    const next = assessmentsToday + 1
+    setAssessmentsToday(next)
+    localStorage.setItem('flz-assessments', JSON.stringify({ date: today, count: next }))
+  }
+
   // ── Core flow state ──────────────────────────────────────────────────────
   const [screen, setScreen]         = useState('onboarding')
   const [resetKey, setResetKey]     = useState(0)
@@ -129,6 +147,7 @@ export default function App() {
 
   // ── Analysis flow ────────────────────────────────────────────────────────
   async function handleSubmit(input) {
+    if (!isPro && assessmentsToday >= DAILY_LIMIT) return
     setUserInput(input)
     setError(null)
     setSavedEntry(false)
@@ -143,6 +162,7 @@ export default function App() {
       if (!res.ok) throw new Error('Analysis failed')
       const data = await res.json()
       setAnalysis(data)
+      incrementAssessments()
       setScreen('results')
     } catch {
       setError('Something went wrong. Please try again.')
@@ -159,6 +179,11 @@ export default function App() {
     setSavedEntry(false)
     setViewingHistorical(false)
     setResetKey(k => k + 1)
+  }
+
+  function handleUpgradeClick() {
+    // Will navigate to Stripe checkout once payments are set up
+    setScreen('upgrade')
   }
 
   function handleSavePrompt() {
@@ -229,6 +254,10 @@ export default function App() {
               error={error}
               userName={userName}
               onSaveName={handleSaveName}
+              assessmentsToday={assessmentsToday}
+              dailyLimit={DAILY_LIMIT}
+              isPro={isPro}
+              onUpgrade={handleUpgradeClick}
             />
           </motion.div>
         )}
