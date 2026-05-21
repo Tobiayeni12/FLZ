@@ -9,6 +9,7 @@ import AuthScreen        from './components/AuthScreen'
 import HistoryScreen     from './components/HistoryScreen'
 import SettingsScreen    from './components/SettingsScreen'
 import JournalScreen     from './components/JournalScreen'
+import UpgradeScreen     from './components/UpgradeScreen'
 import PolkaDotBackground from './components/PolkaDotBackground'
 import Logo              from './components/Logo'
 import ProfileIcon       from './components/ProfileIcon'
@@ -33,7 +34,8 @@ export default function App() {
 
   // ── Plan config ──────────────────────────────────────────────────────────
   const DAILY_LIMIT = 10
-  const isPro = false // will be wired to Stripe/Supabase profile later
+  const [isPro, setIsPro] = useState(false)
+  const pendingUpgradeRef = useRef(false)
 
   // ── Daily assessment counter ──────────────────────────────────────────────
   const [assessmentsToday, setAssessmentsToday] = useState(() => {
@@ -48,6 +50,22 @@ export default function App() {
     setAssessmentsToday(next)
     localStorage.setItem('flz-assessments', JSON.stringify({ date: today, count: next }))
   }
+
+  // ── Fetch Pro status from Supabase whenever user changes ────────────────
+  useEffect(() => {
+    if (!user) { setIsPro(false); return }
+    supabase.from('profiles').select('is_pro').eq('id', user.id).single()
+      .then(({ data }) => setIsPro(data?.is_pro ?? false))
+  }, [user])
+
+  // ── Detect post-Stripe redirect (?upgraded=true) ─────────────────────────
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('upgraded') === 'true') {
+      window.history.replaceState({}, document.title, window.location.pathname)
+      setIsPro(true)
+    }
+  }, [])
 
   // ── Core flow state ──────────────────────────────────────────────────────
   const [screen, setScreen]         = useState('onboarding')
@@ -94,6 +112,9 @@ export default function App() {
 
         if (pendingEntryRef.current) {
           setScreen('results')
+        } else if (pendingUpgradeRef.current) {
+          pendingUpgradeRef.current = false
+          setScreen('upgrade')
         } else if (isOAuthCallback || isFromAuthScreen) {
           setScreen('history')
         }
@@ -104,6 +125,7 @@ export default function App() {
         setScreen('onboarding')
         setResetKey(k => k + 1)
         setSavedEntry(false)
+        setIsPro(false)
       }
     })
 
@@ -182,8 +204,12 @@ export default function App() {
   }
 
   function handleUpgradeClick() {
-    // Will navigate to Stripe checkout once payments are set up
-    setScreen('upgrade')
+    if (!user) {
+      pendingUpgradeRef.current = true
+      setScreen('auth')
+    } else {
+      setScreen('upgrade')
+    }
   }
 
   function handleSavePrompt() {
@@ -333,6 +359,18 @@ export default function App() {
             <JournalScreen
               user={user}
               onBack={() => setScreen(user ? 'history' : 'onboarding')}
+            />
+          </motion.div>
+        )}
+
+        {screen === 'upgrade' && (
+          <motion.div key="upgrade"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }} style={{ position: 'fixed', inset: 0 }}
+          >
+            <UpgradeScreen
+              user={user}
+              onBack={() => setScreen(analysis ? 'results' : 'onboarding')}
             />
           </motion.div>
         )}
