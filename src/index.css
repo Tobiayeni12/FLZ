@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Design tokens ───────────────────────────────────────────────── */
+:root {
+  --flz-bg:           #ffffff;
+  --flz-text:         #000000;
+  --flz-text-muted:   #bbbbbb;
+  --flz-text-dim:     #999999;
+  --flz-text-faint:   #cccccc;
+  --flz-border:       rgba(0,0,0,0.08);
+  --flz-border-soft:  rgba(0,0,0,0.07);
+  --flz-border-input: rgba(0,0,0,0.15);
+  --flz-dot:          rgba(0,0,0,0.065);
+  --flz-surface:      #ffffff;
+  --flz-placeholder:  #9ca3af;
+  --flz-tag-bg:       rgba(0,0,0,0.04);
+  --flz-tag-border:   rgba(0,0,0,0.09);
+}
+
+html.dark {
+  --flz-bg:           #0c0c0c;
+  --flz-text:         #efefef;
+  --flz-text-muted:   rgba(255,255,255,0.28);
+  --flz-text-dim:     rgba(255,255,255,0.45);
+  --flz-text-faint:   rgba(255,255,255,0.18);
+  --flz-border:       rgba(255,255,255,0.07);
+  --flz-border-soft:  rgba(255,255,255,0.06);
+  --flz-border-input: rgba(255,255,255,0.18);
+  --flz-dot:          rgba(255,255,255,0.035);
+  --flz-surface:      #141414;
+  --flz-placeholder:  rgba(255,255,255,0.25);
+  --flz-tag-bg:       rgba(255,255,255,0.06);
+  --flz-tag-border:   rgba(255,255,255,0.1);
+}
+
+body {
+  background: var(--flz-bg);
+  color: var(--flz-text);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+
+input, textarea, button {
+  font-family: inherit;
+}
+
+::selection {
+  background: rgba(128,128,128,0.2);
+}
