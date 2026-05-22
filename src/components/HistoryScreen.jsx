@@ -89,6 +89,12 @@ const ENERGY_MAP  = { low: 1, medium: 2, high: 3 }
 const EMOTION_MAP = { negative: 1, neutral: 2, mixed: 2, positive: 3 }
 const CLARITY_MAP = { confused: 1, reflective: 2, focused: 3 }
 
+const DIM_CHART_COLORS = {
+  energy:  '#f59e0b',   // amber  — warmth / vitality
+  emotion: '#6366f1',   // indigo — feeling / depth
+  clarity: '#10b981',   // emerald — focus / clearness
+}
+
 function DimensionChart({ entries, isPro }) {
   const limit = isPro ? 20 : 10
   const data = entries.slice(0, limit).reverse()
@@ -112,9 +118,9 @@ function DimensionChart({ entries, isPro }) {
   }
 
   const lines = [
-    { key: 'energy',  opacity: 0.85, dash: 'none', label: 'Energy'  },
-    { key: 'emotion', opacity: 0.45, dash: '5 3',  label: 'Emotion' },
-    { key: 'clarity', opacity: 0.22, dash: '2 3',  label: 'Clarity' },
+    { key: 'energy',  color: DIM_CHART_COLORS.energy,  label: 'Energy'  },
+    { key: 'emotion', color: DIM_CHART_COLORS.emotion, label: 'Emotion' },
+    { key: 'clarity', color: DIM_CHART_COLORS.clarity, label: 'Clarity' },
   ]
 
   return (
@@ -126,17 +132,26 @@ function DimensionChart({ entries, isPro }) {
         <p style={{ margin: 0, fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.8125rem', color: 'var(--flz-text)', letterSpacing: '-0.01em' }}>
           Dimension trends {isPro && data.length > 10 && <span style={{ fontSize: '0.65rem', color: 'var(--flz-text-muted)', marginLeft: '6px' }}>last {data.length}</span>}
         </p>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          {lines.map(l => <span key={l.key} style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.62rem', letterSpacing: '0.05em', color: 'var(--flz-text-muted)', opacity: l.opacity + 0.15 }}>{l.label}</span>)}
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          {lines.map(l => (
+            <div key={l.key} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: l.color, flexShrink: 0 }} />
+              <span style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.62rem', letterSpacing: '0.05em', color: 'var(--flz-text-muted)' }}>{l.label}</span>
+            </div>
+          ))}
         </div>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', display: 'block' }}>
         {[1, 2, 3].map(v => <line key={v} x1={PL} y1={py(v)} x2={W - PR} y2={py(v)} stroke="var(--flz-border)" strokeWidth="1" />)}
         {lines.map(l => (
-          <path key={l.key} d={path(l.key)} fill="none" stroke="var(--flz-text)" strokeWidth="1.5"
-            opacity={l.opacity} strokeDasharray={l.dash === 'none' ? undefined : l.dash} strokeLinecap="round" strokeLinejoin="round" />
+          <path key={l.key} d={path(l.key)} fill="none" stroke={l.color} strokeWidth="1.75"
+            strokeLinecap="round" strokeLinejoin="round" opacity="0.9" />
         ))}
-        {points.map((p, i) => <circle key={i} cx={px(i)} cy={py(p.energy)} r="2.5" fill="var(--flz-text)" opacity="0.85" />)}
+        {lines.map(l =>
+          points.map((p, i) => (
+            <circle key={`${l.key}-${i}`} cx={px(i)} cy={py(p[l.key])} r="2.5" fill={l.color} opacity="0.9" />
+          ))
+        )}
       </svg>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px' }}>
         {[data[0], data[Math.floor(data.length / 2)], data[data.length - 1]].filter(Boolean).map((e, i) => (
