@@ -18,6 +18,32 @@ export default function SettingsScreen({ user, userName, onSaveName, onBack, foc
   const [areasSaved, setAreasSaved] = useState(false)
   const [areasSaving, setAreasSaving] = useState(false)
 
+  // Subscription cancellation
+  const [cancelConfirm, setCancelConfirm]   = useState(false)
+  const [cancelling, setCancelling]         = useState(false)
+  const [cancelledUntil, setCancelledUntil] = useState(null)
+  const [cancelError, setCancelError]       = useState(null)
+
+  async function handleCancelSubscription() {
+    if (!user || cancelling) return
+    setCancelling(true)
+    setCancelError(null)
+    try {
+      const res = await fetch('/api/cancel-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Cancellation failed')
+      setCancelledUntil(data.periodEnd)
+      setCancelConfirm(false)
+    } catch (err) {
+      setCancelError(err.message)
+    }
+    setCancelling(false)
+  }
+
   function handleSaveName(e) {
     e?.preventDefault()
     if (!name.trim()) return
@@ -150,6 +176,69 @@ export default function SettingsScreen({ user, userName, onSaveName, onBack, foc
             </div>
           )}
         </motion.div>
+
+        {/* Subscription management — Pro only */}
+        {isPro && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: EASE_CALM, delay: 0.35 }}
+            style={{ borderTop: '1px solid var(--flz-border)', paddingTop: '32px', paddingBottom: '40px' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+              <label style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.72rem', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--flz-text-muted)' }}>
+                Subscription
+              </label>
+              <span style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.6rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--flz-text)', border: '1px solid var(--flz-text)', borderRadius: '2px', padding: '1px 5px' }}>Pro</span>
+            </div>
+
+            {cancelledUntil ? (
+              <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.8125rem', color: 'var(--flz-text-muted)', margin: '10px 0 0', lineHeight: 1.6 }}>
+                Your subscription will end on{' '}
+                <strong style={{ color: 'var(--flz-text)', fontWeight: 500 }}>
+                  {new Date(cancelledUntil).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                </strong>
+                . You'll keep Pro access until then.
+              </p>
+            ) : cancelConfirm ? (
+              <div style={{ marginTop: '12px' }}>
+                <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.8125rem', color: 'var(--flz-text-muted)', margin: '0 0 18px', lineHeight: 1.6 }}>
+                  You'll keep Pro access until the end of your current billing period. Are you sure?
+                </p>
+                {cancelError && (
+                  <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.75rem', color: '#ef4444', margin: '0 0 12px' }}>{cancelError}</p>
+                )}
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                  <button onClick={handleCancelSubscription} disabled={cancelling}
+                    style={{ padding: '10px 22px', background: 'none', border: '1px solid #ef4444', borderRadius: '2px', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.875rem', color: '#ef4444', letterSpacing: '0.02em', cursor: cancelling ? 'default' : 'pointer', opacity: cancelling ? 0.5 : 1, transition: 'all 0.2s' }}
+                    onMouseEnter={e => { if (!cancelling) { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#fff' } }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#ef4444' }}
+                  >
+                    {cancelling ? 'Cancelling…' : 'Yes, cancel'}
+                  </button>
+                  <button onClick={() => { setCancelConfirm(false); setCancelError(null) }}
+                    style={{ background: 'none', border: 'none', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.8125rem', color: 'var(--flz-text-muted)', cursor: 'pointer', padding: 0, transition: 'color 0.2s' }}
+                    onMouseEnter={e => e.target.style.color = 'var(--flz-text)'}
+                    onMouseLeave={e => e.target.style.color = 'var(--flz-text-muted)'}
+                  >
+                    Keep Pro
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ marginTop: '10px' }}>
+                <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.8125rem', color: 'var(--flz-text-muted)', margin: '0 0 18px', lineHeight: 1.6 }}>
+                  You're on the Pro plan. All features are unlocked and your journal is unlimited.
+                </p>
+                <button onClick={() => setCancelConfirm(true)}
+                  style={{ padding: '10px 22px', background: 'none', border: '1px solid var(--flz-border-input)', borderRadius: '2px', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.875rem', color: 'var(--flz-text-muted)', letterSpacing: '0.02em', cursor: 'pointer', transition: 'all 0.2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#ef4444'; e.currentTarget.style.color = '#ef4444' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--flz-border-input)'; e.currentTarget.style.color = 'var(--flz-text-muted)' }}
+                >
+                  Cancel subscription
+                </button>
+              </div>
+            )}
+          </motion.div>
+        )}
 
         {/* Back */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.4 }} style={{ paddingTop: '48px' }}>
