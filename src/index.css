@@ -15,16 +15,16 @@ html, body, #root {
 /* ── Design tokens ───────────────────────────────────────────────── */
 :root {
   --flz-bg:           #ffffff;
-  --flz-text:         #000000;
-  --flz-text-muted:   #bbbbbb;
-  --flz-text-dim:     #999999;
-  --flz-text-faint:   #cccccc;
-  --flz-border:       rgba(0,0,0,0.08);
+  --flz-text:         #111111;
+  --flz-text-muted:   #666666;
+  --flz-text-dim:     #444444;
+  --flz-text-faint:   #aaaaaa;
+  --flz-border:       rgba(0,0,0,0.09);
   --flz-border-soft:  rgba(0,0,0,0.07);
-  --flz-border-input: rgba(0,0,0,0.15);
+  --flz-border-input: rgba(0,0,0,0.18);
   --flz-dot:          rgba(0,0,0,0.065);
   --flz-surface:      #ffffff;
-  --flz-placeholder:  #9ca3af;
+  --flz-placeholder:  #999999;
   --flz-tag-bg:       rgba(0,0,0,0.04);
   --flz-tag-border:   rgba(0,0,0,0.09);
 }
