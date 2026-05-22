@@ -51,6 +51,17 @@ export default function App() {
     localStorage.setItem('flz-assessments', JSON.stringify({ date: today, count: next }))
   }
 
+  // ── Core flow state ──────────────────────────────────────────────────────
+  const [screen, setScreen]         = useState('onboarding')
+  const [resetKey, setResetKey]     = useState(0)
+  const [userInput, setUserInput]   = useState('')
+  const [analysis, setAnalysis]     = useState(null)
+  const [error, setError]           = useState(null)
+
+  // ── Auth state ───────────────────────────────────────────────────────────
+  const [user, setUser]               = useState(null)
+  const [authLoading, setAuthLoading] = useState(true)
+
   // ── Fetch Pro status from Supabase whenever user changes ────────────────
   useEffect(() => {
     if (!user) { setIsPro(false); return }
@@ -66,17 +77,6 @@ export default function App() {
       setIsPro(true)
     }
   }, [])
-
-  // ── Core flow state ──────────────────────────────────────────────────────
-  const [screen, setScreen]         = useState('onboarding')
-  const [resetKey, setResetKey]     = useState(0)
-  const [userInput, setUserInput]   = useState('')
-  const [analysis, setAnalysis]     = useState(null)
-  const [error, setError]           = useState(null)
-
-  // ── Auth state ───────────────────────────────────────────────────────────
-  const [user, setUser]               = useState(null)
-  const [authLoading, setAuthLoading] = useState(true)
 
   // ── Save state ───────────────────────────────────────────────────────────
   const [savedEntry, setSavedEntry]   = useState(false)
