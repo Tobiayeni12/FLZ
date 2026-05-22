@@ -125,7 +125,7 @@ export default function SettingsScreen({ user, userName, onSaveName, onBack, foc
         {/* Focus areas — Pro only */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: EASE_CALM, delay: 0.25 }}
-          style={{ borderTop: '1px solid var(--flz-border)', paddingTop: '32px' }}
+          style={{ borderTop: '1px solid var(--flz-border)', paddingTop: '32px', paddingBottom: '40px' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
             <label style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.72rem', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--flz-text-muted)' }}>
