@@ -321,9 +321,17 @@ function PathItem({ meta, data, isOpen, onToggle, index, isLoggedIn, onSaveAnswe
 // ── Main results screen ───────────────────────────────────────────────────────
 
 export default function ResultsScreen({
-  analysis, onReset, isSaved, isLoggedIn, onSavePrompt, onBackToHistory, onSaveJournalEntry,
+  analysis, onReset, isSaved, isLoggedIn, onSavePrompt, onSaveEntry, onBackToHistory, isHistorical, onSaveJournalEntry,
 }) {
   const [openPath, setOpenPath] = useState('understand')
+  const [saving, setSaving]     = useState(false)
+
+  async function handleSaveEntry() {
+    if (saving) return
+    setSaving(true)
+    await onSaveEntry?.()
+    setSaving(false)
+  }
 
   function toggle(id) {
     setOpenPath(prev => (prev === id ? null : id))
@@ -341,7 +349,6 @@ export default function ResultsScreen({
 
   const stateLabel = analysis?.stateLabel ?? 'a reflective moment'
   const dims = analysis?.dimensions ?? {}
-  const fromHistory = isLoggedIn && isSaved && typeof onBackToHistory === 'function'
 
   return (
     <div style={{ minHeight: '100vh', paddingTop: '96px', paddingBottom: '80px', position: 'relative', zIndex: 10 }}>
@@ -383,9 +390,7 @@ export default function ResultsScreen({
             fontSize: '0.8125rem', color: 'var(--flz-text-muted)',
             margin: 0, letterSpacing: '0.01em',
           }}>
-            {isSaved
-              ? 'Saved to your history.'
-              : 'Five ways to work with this moment.'}
+            Five ways to work with this moment.
           </p>
         </motion.div>
 
@@ -417,34 +422,42 @@ export default function ResultsScreen({
           transition={{ duration: 0.6, delay: 1 }}
           style={{ textAlign: 'center', paddingTop: '52px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}
         >
-          {/* Save prompt — guests only */}
-          {!isLoggedIn && !isSaved && (
-            <button
-              onClick={onSavePrompt}
-              style={{
-                background: 'none',
-                border: '1px solid var(--flz-border-input)',
-                borderRadius: '2px',
+          {/* Save this moment — all users on fresh assessments */}
+          {!isHistorical && (
+            isSaved ? (
+              <p style={{
                 fontFamily: 'Inter, system-ui, sans-serif',
-                fontSize: '0.875rem', color: 'var(--flz-text)',
-                cursor: 'pointer', letterSpacing: '0.02em',
-                padding: '10px 22px', transition: 'all 0.2s',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = 'var(--flz-text)'
-                e.currentTarget.style.color = 'var(--flz-bg)'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'none'
-                e.currentTarget.style.color = 'var(--flz-text)'
-              }}
-            >
-              Save this moment →
-            </button>
+                fontSize: '0.875rem', color: 'var(--flz-text-muted)',
+                margin: 0, letterSpacing: '0.01em',
+              }}>
+                Saved to your history ✓
+              </p>
+            ) : (
+              <button
+                onClick={isLoggedIn ? handleSaveEntry : onSavePrompt}
+                disabled={saving}
+                style={{
+                  background: 'none',
+                  border: '1px solid var(--flz-border-input)',
+                  borderRadius: '2px',
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                  fontSize: '0.875rem', color: 'var(--flz-text)',
+                  cursor: saving ? 'default' : 'pointer',
+                  letterSpacing: '0.02em',
+                  padding: '10px 22px',
+                  opacity: saving ? 0.5 : 1,
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={e => { if (!saving) { e.currentTarget.style.background = 'var(--flz-text)'; e.currentTarget.style.color = 'var(--flz-bg)' } }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--flz-text)' }}
+              >
+                {saving ? 'Saving…' : 'Save this moment →'}
+              </button>
+            )
           )}
 
           <button
-            onClick={fromHistory ? onBackToHistory : onReset}
+            onClick={isHistorical ? onBackToHistory : onReset}
             style={{
               background: 'none', border: 'none',
               fontFamily: 'Inter, system-ui, sans-serif',
@@ -455,7 +468,7 @@ export default function ResultsScreen({
             onMouseEnter={e => e.target.style.color = 'var(--flz-text)'}
             onMouseLeave={e => e.target.style.color = 'var(--flz-text-muted)'}
           >
-            {fromHistory ? '← Back to history' : '← Think again'}
+            {isHistorical ? '← Back to history' : '← Back to FLZ'}
           </button>
         </motion.div>
 

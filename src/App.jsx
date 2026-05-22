@@ -136,41 +136,46 @@ export default function App() {
     return () => { mounted = false; subscription.unsubscribe() }
   }, [])
 
-  // ── Auto-save when logged-in user lands on results ───────────────────────
+  // ── Auto-save pending entry after guest signs in ─────────────────────────
   useEffect(() => {
-    if (screen !== 'results' || savedEntry) return
-
-    const entryToSave = user
-      ? { input: userInput, data: analysis }
-      : pendingEntry
-        ? { input: pendingEntry.input, data: pendingEntry.analysis }
-        : null
-
-    if (!entryToSave || !entryToSave.data) return
-
-    async function save() {
-      const dims = entryToSave.data.dimensions ?? {}
-      console.log('[FLZ] Saving entry for user:', user?.id)
+    if (screen !== 'results' || savedEntry || !user || !pendingEntry) return
+    async function savePending() {
+      const dims = pendingEntry.analysis?.dimensions ?? {}
       const { error } = await supabase.from('entries').insert({
         user_id:     user.id,
-        input:       entryToSave.input,
-        analysis:    entryToSave.data,
-        state_label: entryToSave.data.stateLabel,
+        input:       pendingEntry.input,
+        analysis:    pendingEntry.analysis,
+        state_label: pendingEntry.analysis?.stateLabel,
         energy:      dims.energy,
         emotion:     dims.emotion,
         clarity:     dims.clarity,
         focus_areas: focusAreas.length > 0 ? focusAreas : null,
       })
-      if (error) {
-        console.error('[FLZ] Save error:', error)
-      } else {
-        console.log('[FLZ] Entry saved successfully')
-        setSavedEntry(true)
-        if (pendingEntry) setPendingEntry(null)
-      }
+      if (error) { console.error('[FLZ] Pending save error:', error) }
+      else { console.log('[FLZ] Pending entry saved'); setSavedEntry(true); setPendingEntry(null) }
     }
-    save()
+    savePending()
   }, [screen, user])
+
+  // ── Manual save — called when logged-in user presses "Save this moment" ──
+  async function handleSaveEntry() {
+    if (!user || savedEntry || !analysis) return
+    const dims = analysis.dimensions ?? {}
+    const { error } = await supabase.from('entries').insert({
+      user_id:     user.id,
+      input:       userInput,
+      analysis:    analysis,
+      state_label: analysis.stateLabel,
+      energy:      dims.energy,
+      emotion:     dims.emotion,
+      clarity:     dims.clarity,
+      focus_areas: focusAreas.length > 0 ? focusAreas : null,
+    })
+    if (error) { console.error('[FLZ] Save error:', error); return error }
+    console.log('[FLZ] Entry saved')
+    setSavedEntry(true)
+    return null
+  }
 
   // ── Analysis flow ────────────────────────────────────────────────────────
   async function handleSubmit(input) {
@@ -314,6 +319,7 @@ export default function App() {
               isSaved={savedEntry}
               isLoggedIn={!!user}
               onSavePrompt={handleSavePrompt}
+              onSaveEntry={handleSaveEntry}
               onReset={handleReset}
               isHistorical={viewingHistorical}
               onBackToHistory={handleBackToHistory}
