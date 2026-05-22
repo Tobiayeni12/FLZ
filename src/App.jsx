@@ -159,6 +159,7 @@ export default function App() {
         energy:      dims.energy,
         emotion:     dims.emotion,
         clarity:     dims.clarity,
+        focus_areas: focusAreas.length > 0 ? focusAreas : null,
       })
       if (error) {
         console.error('[FLZ] Save error:', error)
@@ -340,6 +341,7 @@ export default function App() {
               onSelectEntry={handleSelectHistoryEntry}
               onSignOut={handleSignOut}
               isPro={isPro}
+              userFocusAreas={focusAreas}
             />
           </motion.div>
         )}

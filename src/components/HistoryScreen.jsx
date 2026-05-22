@@ -414,6 +414,79 @@ function WeekComparison({ entries }) {
   )
 }
 
+// ── Focus area filter + stats ─────────────────────────────────────────────────
+
+function FocusAreaStats({ area, entries }) {
+  const [summary, setSummary] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [fetched, setFetched] = useState(false)
+
+  const stats = useMemo(() => {
+    function top(arr) {
+      const freq = {}
+      arr.forEach(v => v && (freq[v] = (freq[v] || 0) + 1))
+      return Object.entries(freq).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '—'
+    }
+    return {
+      energy:  top(entries.map(e => e.energy)),
+      emotion: top(entries.map(e => e.emotion)),
+      clarity: top(entries.map(e => e.clarity)),
+    }
+  }, [entries])
+
+  async function loadSummary() {
+    if (fetched || entries.length < 3) return
+    setLoading(true)
+    try {
+      const res  = await fetch('/api/pattern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ entries }) })
+      const data = await res.json()
+      setSummary(data.summary ?? null)
+    } catch { setSummary(null) }
+    setLoading(false)
+    setFetched(true)
+  }
+
+  useEffect(() => { setSummary(null); setFetched(false) }, [area])
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: EASE_CALM }}
+      style={{ border: '1px solid var(--flz-border)', borderRadius: '4px', padding: '18px 20px', marginBottom: '28px', background: 'var(--flz-tag-bg)' }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
+        <div>
+          <p style={{ margin: '0 0 3px', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.875rem', color: 'var(--flz-text)', letterSpacing: '-0.01em', fontWeight: 500 }}>{area}</p>
+          <p style={{ margin: 0, fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.75rem', color: 'var(--flz-text-muted)' }}>{entries.length} {entries.length === 1 ? 'entry' : 'entries'} tagged</p>
+        </div>
+        {entries.length >= 3 && !fetched && (
+          <button onClick={loadSummary} disabled={loading}
+            style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.72rem', color: 'var(--flz-text-muted)', background: 'none', border: '1px solid var(--flz-border)', borderRadius: '2px', padding: '4px 10px', cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.5 : 1, transition: 'all 0.15s' }}
+            onMouseEnter={e => { if (!loading) { e.currentTarget.style.borderColor = 'var(--flz-text)'; e.currentTarget.style.color = 'var(--flz-text)' }}}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--flz-border)'; e.currentTarget.style.color = 'var(--flz-text-muted)' }}
+          >{loading ? 'Loading…' : 'Pattern insight'}</button>
+        )}
+      </div>
+
+      {/* Mini stats */}
+      <div style={{ display: 'flex', gap: '20px', marginBottom: summary ? '14px' : 0 }}>
+        {[['Energy', stats.energy], ['Emotion', stats.emotion], ['Clarity', stats.clarity]].map(([label, val]) => (
+          <div key={label}>
+            <p style={{ margin: '0 0 2px', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.62rem', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--flz-text-muted)' }}>{label}</p>
+            <p style={{ margin: 0, fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.8125rem', color: 'var(--flz-text)', fontWeight: 500, textTransform: 'capitalize' }}>{val}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Pattern summary */}
+      {summary && (
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
+          style={{ margin: '14px 0 0', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.875rem', color: 'var(--flz-text)', lineHeight: 1.8, borderTop: '1px solid var(--flz-border)', paddingTop: '14px' }}
+        >{summary}</motion.p>
+      )}
+    </motion.div>
+  )
+}
+
 // ── Dimension filter ──────────────────────────────────────────────────────────
 
 function DimensionFilter({ filter, onChange }) {
@@ -483,11 +556,12 @@ function EntryRow({ entry, index, onSelect }) {
 
 // ── Main history screen ───────────────────────────────────────────────────────
 
-export default function HistoryScreen({ user, onSelectEntry, onSignOut, isPro }) {
-  const [entries, setEntries]   = useState([])
-  const [loading, setLoading]   = useState(true)
+export default function HistoryScreen({ user, onSelectEntry, onSignOut, isPro, userFocusAreas = [] }) {
+  const [entries, setEntries]       = useState([])
+  const [loading, setLoading]       = useState(true)
   const [showFilter, setShowFilter] = useState(false)
-  const [filter, setFilter]     = useState({ energy: null, emotion: null, clarity: null })
+  const [filter, setFilter]         = useState({ energy: null, emotion: null, clarity: null })
+  const [focusFilter, setFocusFilter] = useState(null) // active focus area filter
 
   useEffect(() => {
     async function load() {
@@ -503,13 +577,19 @@ export default function HistoryScreen({ user, onSelectEntry, onSignOut, isPro })
 
   const filteredEntries = useMemo(() => {
     return entries.filter(e =>
-      (!filter.energy  || e.energy  === filter.energy)  &&
-      (!filter.emotion || e.emotion === filter.emotion) &&
-      (!filter.clarity || e.clarity === filter.clarity)
+      (!filter.energy   || e.energy  === filter.energy)  &&
+      (!filter.emotion  || e.emotion === filter.emotion) &&
+      (!filter.clarity  || e.clarity === filter.clarity) &&
+      (!focusFilter     || (Array.isArray(e.focus_areas) && e.focus_areas.includes(focusFilter)))
     )
-  }, [entries, filter])
+  }, [entries, filter, focusFilter])
 
-  const hasFilter = Object.values(filter).some(Boolean)
+  const focusFilteredEntries = useMemo(() => {
+    if (!focusFilter) return []
+    return entries.filter(e => Array.isArray(e.focus_areas) && e.focus_areas.includes(focusFilter))
+  }, [entries, focusFilter])
+
+  const hasFilter = Object.values(filter).some(Boolean) || !!focusFilter
 
   return (
     <div style={{ minHeight: '100vh', paddingTop: '96px', paddingBottom: '80px', position: 'relative', zIndex: 10 }}>
@@ -564,6 +644,34 @@ export default function HistoryScreen({ user, onSelectEntry, onSignOut, isPro })
           </motion.p>
         ) : (
           <>
+            {/* Focus area chips */}
+            {userFocusAreas.length > 0 && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
+                style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '24px', alignItems: 'center' }}
+              >
+                <span style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.68rem', color: 'var(--flz-text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', marginRight: '2px' }}>Focus</span>
+                {userFocusAreas.map(area => {
+                  const active = focusFilter === area
+                  return (
+                    <button key={area} onClick={() => setFocusFilter(active ? null : area)}
+                      style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.75rem', padding: '4px 12px', borderRadius: '20px', cursor: 'pointer', transition: 'all 0.15s', background: active ? 'var(--flz-text)' : 'transparent', color: active ? 'var(--flz-bg)' : 'var(--flz-text)', border: `1px solid ${active ? 'var(--flz-text)' : 'var(--flz-border-input)'}` }}
+                      onMouseEnter={e => { if (!active) e.currentTarget.style.borderColor = 'var(--flz-text)' }}
+                      onMouseLeave={e => { if (!active) e.currentTarget.style.borderColor = 'var(--flz-border-input)' }}
+                    >{area}</button>
+                  )
+                })}
+              </motion.div>
+            )}
+
+            {/* Focus area stats card */}
+            <AnimatePresence>
+              {focusFilter && focusFilteredEntries.length > 0 && (
+                <motion.div key={focusFilter} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+                  <FocusAreaStats area={focusFilter} entries={focusFilteredEntries} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Filter panel */}
             <AnimatePresence>
               {showFilter && (
@@ -581,7 +689,7 @@ export default function HistoryScreen({ user, onSelectEntry, onSignOut, isPro })
                     style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.72rem', padding: '3px 10px', borderRadius: '20px', background: 'var(--flz-text)', color: 'var(--flz-bg)', border: 'none', cursor: 'pointer' }}
                   >{k}: {v} ×</button>
                 ))}
-                <button onClick={() => setFilter({ energy: null, emotion: null, clarity: null })}
+                <button onClick={() => { setFilter({ energy: null, emotion: null, clarity: null }); setFocusFilter(null) }}
                   style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.72rem', color: 'var(--flz-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: '3px 4px' }}
                 >Clear all</button>
               </motion.div>
