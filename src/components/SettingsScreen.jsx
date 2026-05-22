@@ -39,7 +39,9 @@ export default function SettingsScreen({ user, userName, onSaveName, onBack, foc
     const { error } = await supabase
       .from('profiles')
       .upsert({ id: user.id, focus_areas: areas, updated_at: new Date().toISOString() })
-    if (!error) {
+    if (error) {
+      console.error('[FLZ] Focus areas save error:', error)
+    } else {
       onSaveFocusAreas(areas)
       setAreasSaved(true)
       setTimeout(() => setAreasSaved(false), 2000)
