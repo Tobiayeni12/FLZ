@@ -34,8 +34,9 @@ export default function App() {
 
   // ── Plan config ──────────────────────────────────────────────────────────
   const DAILY_LIMIT = 10
-  const [isPro, setIsPro] = useState(false)
-  const pendingUpgradeRef = useRef(false)
+  const [isPro, setIsPro]           = useState(false)
+  const [focusAreas, setFocusAreas] = useState([])
+  const pendingUpgradeRef           = useRef(false)
 
   // ── Daily assessment counter ──────────────────────────────────────────────
   const [assessmentsToday, setAssessmentsToday] = useState(() => {
@@ -62,11 +63,14 @@ export default function App() {
   const [user, setUser]               = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
 
-  // ── Fetch Pro status from Supabase whenever user changes ────────────────
+  // ── Fetch Pro status + focus areas from Supabase whenever user changes ──
   useEffect(() => {
-    if (!user) { setIsPro(false); return }
-    supabase.from('profiles').select('is_pro').eq('id', user.id).single()
-      .then(({ data }) => setIsPro(data?.is_pro ?? false))
+    if (!user) { setIsPro(false); setFocusAreas([]); return }
+    supabase.from('profiles').select('is_pro, focus_areas').eq('id', user.id).single()
+      .then(({ data }) => {
+        setIsPro(data?.is_pro ?? false)
+        setFocusAreas(data?.focus_areas ?? [])
+      })
   }, [user])
 
   // ── Detect post-Stripe redirect (?upgraded=true) ─────────────────────────
@@ -179,7 +183,7 @@ export default function App() {
       const res = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input }),
+        body: JSON.stringify({ input, focusAreas }),
       })
       if (!res.ok) throw new Error('Analysis failed')
       const data = await res.json()
@@ -350,6 +354,8 @@ export default function App() {
               userName={userName}
               onSaveName={handleSaveName}
               onBack={() => setScreen(user ? 'history' : 'onboarding')}
+              focusAreas={focusAreas}
+              onSaveFocusAreas={setFocusAreas}
             />
           </motion.div>
         )}

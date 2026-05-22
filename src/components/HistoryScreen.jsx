@@ -149,6 +149,65 @@ function DimensionChart({ entries, isPro }) {
   )
 }
 
+// ── PRO: Monthly deep dive ────────────────────────────────────────────────────
+
+function MonthlyDeepDive({ entries }) {
+  const [summary, setSummary] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [open, setOpen]       = useState(false)
+  const [fetched, setFetched] = useState(false)
+
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
+  const monthEntries = entries.filter(e => e.created_at >= monthStart)
+
+  if (monthEntries.length < 3) return null
+
+  async function load() {
+    if (fetched) { setOpen(o => !o); return }
+    setOpen(true); setLoading(true)
+    try {
+      const res  = await fetch('/api/monthly-summary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ entries: monthEntries }) })
+      const data = await res.json()
+      setSummary(data.summary ?? null)
+    } catch { setSummary(null) }
+    setLoading(false); setFetched(true)
+  }
+
+  const monthLabel = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date())
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: EASE_CALM, delay: 0.05 }}
+      style={{ borderRadius: '4px', border: '1px solid var(--flz-border)', padding: '20px 24px', marginBottom: '36px', background: 'var(--flz-tag-bg)' }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }} onClick={load}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
+            <p style={{ margin: 0, fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.875rem', color: 'var(--flz-text)', letterSpacing: '-0.01em' }}>{monthLabel} deep dive</p>
+            <span style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.6rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--flz-text-muted)', border: '1px solid var(--flz-border)', borderRadius: '2px', padding: '1px 5px' }}>Pro</span>
+          </div>
+          <p style={{ margin: 0, fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.75rem', color: 'var(--flz-text-muted)' }}>{monthEntries.length} {monthEntries.length === 1 ? 'entry' : 'entries'} this month</p>
+        </div>
+        <span style={{ color: 'var(--flz-text-muted)', fontSize: '1.1rem', lineHeight: 1 }}>{open ? '−' : '+'}</span>
+      </div>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.4, ease: EASE_CALM }} style={{ overflow: 'hidden' }}>
+            <div style={{ paddingTop: '18px' }}>
+              {loading
+                ? <p style={{ margin: 0, fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.875rem', color: 'var(--flz-text-muted)' }}>Reflecting on your month…</p>
+                : summary
+                  ? <p style={{ margin: 0, fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.9rem', color: 'var(--flz-text)', lineHeight: 1.8 }}>{summary}</p>
+                  : <p style={{ margin: 0, fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.875rem', color: 'var(--flz-text-muted)' }}>Could not generate deep dive right now.</p>
+              }
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
+
 // ── Pattern summary ───────────────────────────────────────────────────────────
 
 function PatternSummary({ entries }) {
@@ -536,6 +595,9 @@ export default function HistoryScreen({ user, onSelectEntry, onSignOut, isPro })
 
             {/* PRO: Weekly summary */}
             {isPro && <WeeklySummary entries={entries} />}
+
+            {/* PRO: Monthly deep dive */}
+            {isPro && <MonthlyDeepDive entries={entries} />}
 
             {/* PRO: Week comparison */}
             {isPro && entries.length >= 4 && <WeekComparison entries={entries} />}

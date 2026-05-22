@@ -74,17 +74,21 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const { input } = req.body
+  const { input, focusAreas } = req.body
   if (!input?.trim()) {
     return res.status(400).json({ error: 'Input is required.' })
   }
+
+  const focusNote = Array.isArray(focusAreas) && focusAreas.length > 0
+    ? `\n\nUSER FOCUS AREAS: This user has chosen to focus on: ${focusAreas.join(', ')}. Where relevant, tailor your guide resources and move actions to connect with these areas.`
+    : ''
 
   try {
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 2000,
-      system: SYSTEM_PROMPT,
+      system: SYSTEM_PROMPT + focusNote,
       messages: [{ role: 'user', content: input.trim() }],
     })
 
