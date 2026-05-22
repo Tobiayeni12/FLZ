@@ -9,7 +9,7 @@ const FOCUS_OPTIONS = [
   'Mindfulness', 'Finances', 'Learning', 'Social',
 ]
 
-export default function SettingsScreen({ user, userName, onSaveName, onBack, focusAreas, onSaveFocusAreas }) {
+export default function SettingsScreen({ user, userName, onSaveName, onBack, focusAreas, onSaveFocusAreas, isPro, onUpgrade }) {
   const [name, setName]           = useState(userName || '')
   const [nameFocused, setNameFocused] = useState(false)
   const [nameSaved, setNameSaved] = useState(false)
@@ -94,40 +94,59 @@ export default function SettingsScreen({ user, userName, onSaveName, onBack, foc
           </form>
         </motion.div>
 
-        {/* Focus areas */}
+        {/* Focus areas — Pro only */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: EASE_CALM, delay: 0.25 }}
           style={{ borderTop: '1px solid var(--flz-border)', paddingTop: '32px' }}
         >
-          <label style={{ display: 'block', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.72rem', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--flz-text-muted)', marginBottom: '6px' }}>
-            Growth focus areas
-          </label>
-          <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.75rem', color: 'var(--flz-text-muted)', margin: '0 0 20px', lineHeight: 1.5 }}>
-            FLZ will tailor your recommendations and resources to these areas.
-          </p>
-
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '28px' }}>
-            {FOCUS_OPTIONS.map(area => {
-              const active = areas.includes(area)
-              return (
-                <button key={area} onClick={() => toggleArea(area)}
-                  style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.8125rem', padding: '7px 16px', borderRadius: '20px', cursor: 'pointer', transition: 'all 0.15s', background: active ? 'var(--flz-text)' : 'transparent', color: active ? 'var(--flz-bg)' : 'var(--flz-text)', border: `1px solid ${active ? 'var(--flz-text)' : 'var(--flz-border-input)'}` }}
-                  onMouseEnter={e => { if (!active) e.currentTarget.style.borderColor = 'var(--flz-text)' }}
-                  onMouseLeave={e => { if (!active) e.currentTarget.style.borderColor = 'var(--flz-border-input)' }}
-                >
-                  {area}
-                </button>
-              )
-            })}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+            <label style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.72rem', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--flz-text-muted)' }}>
+              Growth focus areas
+            </label>
+            {!isPro && (
+              <span style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.6rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--flz-text-muted)', border: '1px solid var(--flz-border)', borderRadius: '2px', padding: '1px 5px' }}>Pro</span>
+            )}
           </div>
 
-          <button onClick={handleSaveAreas} disabled={areasSaving}
-            style={{ padding: '11px 28px', background: areasSaved ? 'var(--flz-text)' : 'none', border: '1px solid var(--flz-border-input)', borderRadius: '2px', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.875rem', color: areasSaved ? 'var(--flz-bg)' : 'var(--flz-text)', letterSpacing: '0.02em', cursor: areasSaving ? 'default' : 'pointer', opacity: areasSaving ? 0.5 : 1, transition: 'all 0.2s' }}
-            onMouseEnter={e => { if (!areasSaved && !areasSaving) { e.currentTarget.style.background = 'var(--flz-text)'; e.currentTarget.style.color = 'var(--flz-bg)' } }}
-            onMouseLeave={e => { if (!areasSaved) { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--flz-text)' } }}
-          >
-            {areasSaved ? 'Saved ✓' : areasSaving ? 'Saving…' : 'Save'}
-          </button>
+          {isPro ? (
+            <>
+              <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.75rem', color: 'var(--flz-text-muted)', margin: '0 0 20px', lineHeight: 1.5 }}>
+                FLZ will tailor your recommendations and resources to these areas.
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '28px' }}>
+                {FOCUS_OPTIONS.map(area => {
+                  const active = areas.includes(area)
+                  return (
+                    <button key={area} onClick={() => toggleArea(area)}
+                      style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.8125rem', padding: '7px 16px', borderRadius: '20px', cursor: 'pointer', transition: 'all 0.15s', background: active ? 'var(--flz-text)' : 'transparent', color: active ? 'var(--flz-bg)' : 'var(--flz-text)', border: `1px solid ${active ? 'var(--flz-text)' : 'var(--flz-border-input)'}` }}
+                      onMouseEnter={e => { if (!active) e.currentTarget.style.borderColor = 'var(--flz-text)' }}
+                      onMouseLeave={e => { if (!active) e.currentTarget.style.borderColor = 'var(--flz-border-input)' }}
+                    >{area}</button>
+                  )
+                })}
+              </div>
+              <button onClick={handleSaveAreas} disabled={areasSaving}
+                style={{ padding: '11px 28px', background: areasSaved ? 'var(--flz-text)' : 'none', border: '1px solid var(--flz-border-input)', borderRadius: '2px', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.875rem', color: areasSaved ? 'var(--flz-bg)' : 'var(--flz-text)', letterSpacing: '0.02em', cursor: areasSaving ? 'default' : 'pointer', opacity: areasSaving ? 0.5 : 1, transition: 'all 0.2s' }}
+                onMouseEnter={e => { if (!areasSaved && !areasSaving) { e.currentTarget.style.background = 'var(--flz-text)'; e.currentTarget.style.color = 'var(--flz-bg)' } }}
+                onMouseLeave={e => { if (!areasSaved) { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--flz-text)' } }}
+              >
+                {areasSaved ? 'Saved ✓' : areasSaving ? 'Saving…' : 'Save'}
+              </button>
+            </>
+          ) : (
+            <div style={{ marginTop: '10px' }}>
+              <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.8125rem', color: 'var(--flz-text-muted)', margin: '0 0 16px', lineHeight: 1.6 }}>
+                Choose focus areas like Career, Health, or Relationships — FLZ will tailor every assessment to what matters to you.
+              </p>
+              <button onClick={onUpgrade}
+                style={{ padding: '10px 24px', background: 'var(--flz-text)', border: '1px solid var(--flz-text)', borderRadius: '2px', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.875rem', color: 'var(--flz-bg)', letterSpacing: '0.02em', cursor: 'pointer', transition: 'opacity 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
+                onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+              >
+                Upgrade to Pro
+              </button>
+            </div>
+          )}
         </motion.div>
 
         {/* Back */}

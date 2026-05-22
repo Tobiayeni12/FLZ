@@ -358,6 +358,8 @@ export default function App() {
               onBack={() => setScreen(user ? 'history' : 'onboarding')}
               focusAreas={focusAreas}
               onSaveFocusAreas={setFocusAreas}
+              isPro={isPro}
+              onUpgrade={handleUpgradeClick}
             />
           </motion.div>
         )}
