@@ -90,15 +90,16 @@ export default function ProfileIcon({ user, onSignIn, onHistory, onJournal, onSe
             }}
           >
             {/* Email label */}
-            <p style={{
-              margin: 0, padding: '11px 14px 9px',
-              fontFamily: 'Inter, system-ui, sans-serif',
-              fontSize: '0.7rem', color: 'var(--flz-text-muted)', letterSpacing: '0.01em',
-              borderBottom: '1px solid var(--flz-border)',
-              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-            }}>
-              {user.email}
-            </p>
+            <div style={{ padding: '11px 14px 9px', borderBottom: '1px solid var(--flz-border)' }}>
+              <p style={{ margin: 0, fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.7rem', color: 'var(--flz-text-muted)', letterSpacing: '0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {user.email}
+              </p>
+              {isPro && (
+                <span style={{ display: 'inline-block', marginTop: '5px', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.58rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--flz-text)', border: '1px solid var(--flz-text)', borderRadius: '2px', padding: '1px 6px', fontWeight: 500 }}>
+                  Pro
+                </span>
+              )}
+            </div>
 
             {[
               { label: 'History',  fn: () => { setOpen(false); onHistory()  } },

@@ -335,6 +335,7 @@ export default function App() {
               user={user}
               onSelectEntry={handleSelectHistoryEntry}
               onSignOut={handleSignOut}
+              isPro={isPro}
             />
           </motion.div>
         )}
@@ -361,6 +362,7 @@ export default function App() {
             <JournalScreen
               user={user}
               onBack={() => setScreen(user ? 'history' : 'onboarding')}
+              isPro={isPro}
             />
           </motion.div>
         )}
