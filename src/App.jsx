@@ -373,6 +373,7 @@ export default function App() {
               user={user}
               onBack={() => setScreen(user ? 'history' : 'onboarding')}
               isPro={isPro}
+              onUpgrade={handleUpgradeClick}
             />
           </motion.div>
         )}

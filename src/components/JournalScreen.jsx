@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 
 const EASE_CALM = [0.25, 0.46, 0.45, 0.94]
-const FREE_LIMIT = 30
+const FREE_LIMIT = 10
 
 // ── Compose panel (manual entry) ─────────────────────────────────────────────
 
@@ -204,15 +204,17 @@ function EntryCard({ entry, index }) {
 
 // ── Main journal screen ───────────────────────────────────────────────────────
 
-export default function JournalScreen({ user, onBack, isPro }) {
+export default function JournalScreen({ user, onBack, isPro, onUpgrade }) {
   const [entries, setEntries]     = useState([])
   const [loading, setLoading]     = useState(true)
   const [composing, setComposing] = useState(false)
   const [search, setSearch]       = useState('')
   const [typeFilter, setTypeFilter] = useState('all') // all | question | manual
 
-  const limit   = isPro ? Infinity : FREE_LIMIT
-  const atLimit = entries.length >= limit
+  const limit      = isPro ? Infinity : FREE_LIMIT
+  const remaining  = isPro ? Infinity : Math.max(FREE_LIMIT - entries.length, 0)
+  const atLimit    = !isPro && entries.length >= FREE_LIMIT
+  const nearLimit  = !isPro && !atLimit && remaining <= 3
 
   useEffect(() => {
     async function load() {
@@ -257,7 +259,11 @@ export default function JournalScreen({ user, onBack, isPro }) {
                 Journal
               </h2>
               <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.8125rem', color: 'var(--flz-text-muted)', margin: 0 }}>
-                {loading ? '…' : isPro ? `${entries.length} entries · Unlimited` : `${entries.length} / ${FREE_LIMIT} entries`}
+                {loading ? '…' : isPro
+                  ? `${entries.length} entries · Unlimited`
+                  : atLimit
+                    ? `${entries.length} / ${FREE_LIMIT} entries`
+                    : `${entries.length} / ${FREE_LIMIT} entries · ${remaining} left`}
               </p>
             </div>
 
@@ -267,9 +273,10 @@ export default function JournalScreen({ user, onBack, isPro }) {
                 style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px', paddingTop: '6px' }}
               >
                 <div style={{ width: '72px', height: '3px', background: 'var(--flz-border)', borderRadius: '2px', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${fillPct}%`, background: atLimit ? '#ef4444' : 'var(--flz-text)', borderRadius: '2px', transition: 'width 0.5s ease' }} />
+                  <div style={{ height: '100%', width: `${fillPct}%`, background: atLimit ? '#ef4444' : nearLimit ? '#f97316' : 'var(--flz-text)', borderRadius: '2px', transition: 'width 0.5s ease' }} />
                 </div>
                 {atLimit && <span style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.62rem', color: '#ef4444', letterSpacing: '0.04em' }}>Limit reached</span>}
+                {nearLimit && <span style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.62rem', color: '#f97316', letterSpacing: '0.04em' }}>{remaining} left</span>}
               </motion.div>
             )}
           </div>
@@ -300,6 +307,42 @@ export default function JournalScreen({ user, onBack, isPro }) {
             </motion.div>
           )}
         </motion.div>
+
+        {/* Limit reached banner */}
+        {!isPro && atLimit && !loading && (
+          <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: EASE_CALM }}
+            style={{ marginBottom: '32px', padding: '18px 20px', border: '1px solid var(--flz-border)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}
+          >
+            <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.8125rem', color: 'var(--flz-text-muted)', margin: 0, lineHeight: 1.55 }}>
+              You've used all {FREE_LIMIT} free entries. Upgrade for unlimited journaling.
+            </p>
+            <button onClick={onUpgrade}
+              style={{ flexShrink: 0, padding: '8px 18px', background: 'var(--flz-text)', border: 'none', borderRadius: '2px', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.8rem', color: 'var(--flz-bg)', letterSpacing: '0.02em', cursor: 'pointer', transition: 'opacity 0.2s', whiteSpace: 'nowrap' }}
+              onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
+              onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+            >
+              Upgrade to Pro
+            </button>
+          </motion.div>
+        )}
+
+        {/* Near-limit nudge */}
+        {!isPro && nearLimit && !loading && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 0.2 }}
+            style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}
+          >
+            <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.75rem', color: '#f97316', margin: 0 }}>
+              {remaining === 1 ? '1 entry left on the free plan.' : `${remaining} entries left on the free plan.`}
+            </p>
+            <button onClick={onUpgrade}
+              style={{ background: 'none', border: 'none', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.75rem', color: 'var(--flz-text-muted)', cursor: 'pointer', padding: 0, textDecoration: 'underline', transition: 'color 0.2s', whiteSpace: 'nowrap' }}
+              onMouseEnter={e => e.currentTarget.style.color = 'var(--flz-text)'}
+              onMouseLeave={e => e.currentTarget.style.color = 'var(--flz-text-muted)'}
+            >
+              Upgrade
+            </button>
+          </motion.div>
+        )}
 
         {/* Entry list */}
         {loading ? (
