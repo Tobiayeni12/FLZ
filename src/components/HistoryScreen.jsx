@@ -97,7 +97,7 @@ const DIM_CHART_COLORS = {
 
 function DimensionChart({ entries, isPro }) {
   const limit = isPro ? 20 : 10
-  const data = entries.slice(0, limit).reverse()
+  const data  = entries.slice(0, limit).reverse()
   if (data.length < 2) return null
 
   const points = data.map(e => ({
@@ -106,54 +106,86 @@ function DimensionChart({ entries, isPro }) {
     clarity: CLARITY_MAP[e.clarity] ?? 2,
   }))
 
-  const W = 500, H = 90
-  const PL = 4, PR = 4, PT = 8, PB = 8
-  const cW = W - PL - PR, cH = H - PT - PB
-  const n = points.length
-
-  function px(i)   { return PL + (i / (n - 1)) * cW }
-  function py(val) { return PT + cH - ((val - 1) / 2) * cH }
-  function path(key) {
-    return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${px(i).toFixed(1)} ${py(p[key]).toFixed(1)}`).join(' ')
-  }
-
-  const lines = [
+  const tracks = [
     { key: 'energy',  color: DIM_CHART_COLORS.energy,  label: 'Energy'  },
     { key: 'emotion', color: DIM_CHART_COLORS.emotion, label: 'Emotion' },
     { key: 'clarity', color: DIM_CHART_COLORS.clarity, label: 'Clarity' },
   ]
+
+  const W = 500, TRACK_H = 40, GAP = 12
+  const PL = 58, PR = 6, PT = 2, PB = 2
+  const cW = W - PL - PR
+  const n  = points.length
+  const TOTAL_H = PT + tracks.length * TRACK_H + (tracks.length - 1) * GAP + PB
+
+  function trackTop(idx) { return PT + idx * (TRACK_H + GAP) }
+  function px(i)         { return PL + (i / (n - 1)) * cW }
+  function py(val, idx)  {
+    const top = trackTop(idx) + 5
+    const h   = TRACK_H - 10
+    return top + h - ((val - 1) / 2) * h
+  }
+  function linePath(key, idx) {
+    return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${px(i).toFixed(1)},${py(p[key], idx).toFixed(1)}`).join(' ')
+  }
+  function areaPath(key, idx) {
+    const bottom = trackTop(idx) + TRACK_H - 2
+    const line   = points.map((p, i) => `${px(i).toFixed(1)},${py(p[key], idx).toFixed(1)}`).join(' L ')
+    return `M ${px(0).toFixed(1)},${bottom} L ${line} L ${px(n - 1).toFixed(1)},${bottom} Z`
+  }
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: EASE_CALM, delay: 0.1 }}
       style={{ border: '1px solid var(--flz-border)', borderRadius: '4px', padding: '20px 20px 14px', marginBottom: '36px' }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-        <p style={{ margin: 0, fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.8125rem', color: 'var(--flz-text)', letterSpacing: '-0.01em' }}>
-          Dimension trends {isPro && data.length > 10 && <span style={{ fontSize: '0.65rem', color: 'var(--flz-text-muted)', marginLeft: '6px' }}>last {data.length}</span>}
-        </p>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          {lines.map(l => (
-            <div key={l.key} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: l.color, flexShrink: 0 }} />
-              <span style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.62rem', letterSpacing: '0.05em', color: 'var(--flz-text-muted)' }}>{l.label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', display: 'block' }}>
-        {[1, 2, 3].map(v => <line key={v} x1={PL} y1={py(v)} x2={W - PR} y2={py(v)} stroke="var(--flz-border)" strokeWidth="1" />)}
-        {lines.map(l => (
-          <path key={l.key} d={path(l.key)} fill="none" stroke={l.color} strokeWidth="1.75"
-            strokeLinecap="round" strokeLinejoin="round" opacity="0.9" />
-        ))}
-        {lines.map(l =>
-          points.map((p, i) => (
-            <circle key={`${l.key}-${i}`} cx={px(i)} cy={py(p[l.key])} r="2.5" fill={l.color} opacity="0.9" />
-          ))
-        )}
+      <p style={{ margin: '0 0 16px', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.8125rem', color: 'var(--flz-text)', letterSpacing: '-0.01em' }}>
+        Dimension trends {isPro && data.length > 10 && <span style={{ fontSize: '0.65rem', color: 'var(--flz-text-muted)', marginLeft: '6px' }}>last {data.length}</span>}
+      </p>
+
+      <svg viewBox={`0 0 ${W} ${TOTAL_H}`} style={{ width: '100%', display: 'block' }}>
+        {tracks.map((t, idx) => {
+          const top = trackTop(idx)
+          return (
+            <g key={t.key}>
+              {/* Track background */}
+              <rect x={PL} y={top} width={cW} height={TRACK_H} rx="3"
+                fill={t.color} fillOpacity="0.06" />
+
+              {/* Subtle gridlines at low / mid / high */}
+              {[1, 2, 3].map(v => (
+                <line key={v} x1={PL} y1={py(v, idx)} x2={W - PR} y2={py(v, idx)}
+                  stroke={t.color} strokeWidth="0.5" opacity="0.18" />
+              ))}
+
+              {/* Area fill */}
+              <path d={areaPath(t.key, idx)} fill={t.color} fillOpacity="0.10" />
+
+              {/* Line */}
+              <path d={linePath(t.key, idx)} fill="none" stroke={t.color}
+                strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" opacity="0.9" />
+
+              {/* Dots */}
+              {points.map((p, i) => (
+                <circle key={i} cx={px(i)} cy={py(p[t.key], idx)} r="2.5"
+                  fill={t.color} opacity="0.95" />
+              ))}
+
+              {/* Label */}
+              <text
+                x={PL - 10} y={top + TRACK_H / 2 + 4}
+                textAnchor="end"
+                fill={t.color}
+                style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '10px', letterSpacing: '0.03em' }}
+              >
+                {t.label}
+              </text>
+            </g>
+          )
+        })}
       </svg>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px' }}>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', paddingLeft: `${PL / 500 * 100}%` }}>
         {[data[0], data[Math.floor(data.length / 2)], data[data.length - 1]].filter(Boolean).map((e, i) => (
           <span key={i} style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.58rem', color: 'var(--flz-text-muted)' }}>
             {new Date(e.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
