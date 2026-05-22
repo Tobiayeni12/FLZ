@@ -267,6 +267,8 @@ export default function App() {
         onJournal={() => setScreen('journal')}
         onSettings={() => setScreen('settings')}
         onSignOut={handleSignOut}
+        onUpgrade={handleUpgradeClick}
+        isPro={isPro}
       />
 
       <AnimatePresence mode="wait">

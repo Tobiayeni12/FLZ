@@ -13,7 +13,7 @@ function PersonSVG() {
   )
 }
 
-export default function ProfileIcon({ user, onSignIn, onHistory, onJournal, onSettings, onSignOut }) {
+export default function ProfileIcon({ user, onSignIn, onHistory, onJournal, onSettings, onSignOut, onUpgrade, isPro }) {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
@@ -104,6 +104,7 @@ export default function ProfileIcon({ user, onSignIn, onHistory, onJournal, onSe
               { label: 'History',  fn: () => { setOpen(false); onHistory()  } },
               { label: 'Journal',  fn: () => { setOpen(false); onJournal()  } },
               { label: 'Settings', fn: () => { setOpen(false); onSettings() } },
+              ...(!isPro ? [{ label: 'Upgrade to Pro', fn: () => { setOpen(false); onUpgrade() } }] : []),
               { label: 'Sign out', fn: () => { setOpen(false); onSignOut()  } },
             ].map(({ label, fn }) => (
               <button key={label} onClick={fn} style={{
