@@ -231,6 +231,18 @@ export default function OnboardingScreen({ onSubmit, error, userName, onSaveName
 
         </AnimatePresence>
       </div>
+
+      {/* Legal footer */}
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, padding: '16px clamp(20px, 5vw, 32px)', display: 'flex', justifyContent: 'center', gap: '20px', zIndex: 5 }}>
+        <a href="/privacy" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.72rem', color: 'var(--flz-text-faint)', textDecoration: 'none', letterSpacing: '0.02em', transition: 'color 0.2s' }}
+          onMouseEnter={e => e.target.style.color = 'var(--flz-text-muted)'}
+          onMouseLeave={e => e.target.style.color = 'var(--flz-text-faint)'}
+        >Privacy</a>
+        <a href="/terms" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.72rem', color: 'var(--flz-text-faint)', textDecoration: 'none', letterSpacing: '0.02em', transition: 'color 0.2s' }}
+          onMouseEnter={e => e.target.style.color = 'var(--flz-text-muted)'}
+          onMouseLeave={e => e.target.style.color = 'var(--flz-text-faint)'}
+        >Terms</a>
+      </div>
     </div>
   )
 }
