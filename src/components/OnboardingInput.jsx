@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
-export default function OnboardingInput({ onSubmit, placeholder = 'Type here — press Enter to continue' }) {
+export default function OnboardingInput({ onSubmit, placeholder = 'Type here…' }) {
   const [focused, setFocused] = useState(false)
   const [value, setValue] = useState('')
   const inputRef = useRef(null)
@@ -46,6 +46,7 @@ export default function OnboardingInput({ onSubmit, placeholder = 'Type here —
         onKeyDown={handleKeyDown}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
+        enterKeyHint="send"
         style={{
           width: '100%',
           background: 'transparent',
@@ -56,6 +57,7 @@ export default function OnboardingInput({ onSubmit, placeholder = 'Type here —
           letterSpacing: '-0.01em',
           color: 'var(--flz-text)',
           paddingBottom: '8px',
+          paddingRight: value.length > 0 ? '36px' : '0',
           caretColor: 'var(--flz-text)',
           boxShadow: 'none',
         }}
@@ -63,6 +65,37 @@ export default function OnboardingInput({ onSubmit, placeholder = 'Type here —
         spellCheck="false"
         aria-label="Input"
       />
+
+      {/* Submit arrow — visible on mobile, useful on desktop too */}
+      <AnimatePresence>
+        {value.trim().length > 0 && (
+          <motion.button
+            key="submit"
+            type="button"
+            initial={{ opacity: 0, x: 4 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 4 }}
+            transition={{ duration: 0.18 }}
+            onClick={() => onSubmit(value.trim())}
+            style={{
+              position: 'absolute',
+              right: 0,
+              bottom: '2px',
+              background: 'none',
+              border: 'none',
+              padding: '10px 0 10px 14px',
+              fontFamily: 'Inter, system-ui, sans-serif',
+              fontSize: '1.05rem',
+              color: 'var(--flz-text)',
+              cursor: 'pointer',
+              lineHeight: 1,
+              touchAction: 'manipulation',
+            }}
+          >
+            →
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Bottom line */}
       <motion.div

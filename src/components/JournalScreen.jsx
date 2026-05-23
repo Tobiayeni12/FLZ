@@ -247,7 +247,7 @@ export default function JournalScreen({ user, onBack, isPro, onUpgrade }) {
 
   return (
     <div style={{ minHeight: '100vh', paddingTop: '96px', paddingBottom: '120px', position: 'relative', zIndex: 10 }}>
-      <div style={{ maxWidth: '580px', margin: '0 auto', padding: '0 32px' }}>
+      <div style={{ maxWidth: '580px', margin: '0 auto', padding: '0 clamp(20px, 5vw, 32px)' }}>
 
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}

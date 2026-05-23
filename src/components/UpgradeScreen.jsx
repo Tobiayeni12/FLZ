@@ -58,7 +58,7 @@ export default function UpgradeScreen({ user, onBack, onCheckout }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: EASE_CALM }}
         style={{
-          width: '100%', maxWidth: '400px', padding: '0 32px',
+          width: '100%', maxWidth: '400px', padding: '0 clamp(20px, 5vw, 32px)',
           display: 'flex', flexDirection: 'column', alignItems: 'center',
           position: 'relative', zIndex: 10,
         }}

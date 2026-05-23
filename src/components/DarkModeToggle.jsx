@@ -39,25 +39,33 @@ export default function DarkModeToggle({ dark, onToggle }) {
       transition={{ duration: 1.2, ease: 'easeOut', delay: 0.3 }}
       style={{
         position: 'fixed',
-        top: '22px',
-        right: '72px',
+        top: '15px',
+        right: '76px',
         zIndex: 20,
-        width: '34px',
-        height: '34px',
+        width: '44px',
+        height: '44px',
         borderRadius: '50%',
         background: 'transparent',
-        border: '1.3px solid var(--flz-border-input)',
+        border: 'none',
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 0,
+        padding: '5px',
+        touchAction: 'manipulation',
+      }}
+    >
+      <div style={{
+        width: '34px', height: '34px', borderRadius: '50%',
+        border: '1.3px solid var(--flz-border-input)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
         transition: 'border-color 0.2s',
       }}
-      onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--flz-text)'}
-      onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--flz-border-input)'}
-    >
-      {dark ? <SunIcon /> : <MoonIcon />}
+        onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--flz-text)'}
+        onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--flz-border-input)'}
+      >
+        {dark ? <SunIcon /> : <MoonIcon />}
+      </div>
     </motion.button>
   )
 }

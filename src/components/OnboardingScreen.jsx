@@ -36,7 +36,7 @@ export default function OnboardingScreen({ onSubmit, error, userName, onSaveName
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: EASE_CALM }}
           style={{
-            width: '100%', maxWidth: '420px', padding: '0 32px',
+            width: '100%', maxWidth: '420px', padding: '0 clamp(20px, 5vw, 32px)',
             display: 'flex', flexDirection: 'column', alignItems: 'center',
             textAlign: 'center', zIndex: 10, position: 'relative',
           }}
@@ -106,7 +106,7 @@ export default function OnboardingScreen({ onSubmit, error, userName, onSaveName
           alignItems: 'center',
           width: '100%',
           maxWidth: '480px',
-          padding: '0 32px',
+          padding: '0 clamp(20px, 5vw, 32px)',
           position: 'relative',
           zIndex: 10,
         }}
@@ -142,7 +142,7 @@ export default function OnboardingScreen({ onSubmit, error, userName, onSaveName
               <div style={{ width: '100%' }}>
                 <OnboardingInput
                   onSubmit={handleSaveName}
-                  placeholder="Your name — press Enter"
+                  placeholder="Your name…"
                 />
               </div>
             </motion.div>

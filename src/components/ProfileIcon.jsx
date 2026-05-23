@@ -35,40 +35,44 @@ export default function ProfileIcon({ user, onSignIn, onHistory, onJournal, onSe
   return (
     <motion.div
       ref={ref}
-      style={{ position: 'fixed', top: '22px', right: '32px', zIndex: 20 }}
+      style={{ position: 'fixed', top: '15px', right: '24px', zIndex: 20 }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 1.2, ease: 'easeOut', delay: 0.3 }}
     >
-      {/* Avatar button */}
+      {/* Avatar button — 44×44 tap target, visually 34×34 */}
       <button
         onClick={handleClick}
         title={user ? user.email : 'Sign in'}
         style={{
+          width: '44px', height: '44px', borderRadius: '50%',
+          background: 'transparent', border: 'none',
+          cursor: 'pointer', padding: '5px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          touchAction: 'manipulation',
+        }}
+      >
+        <div style={{
           width: '34px', height: '34px', borderRadius: '50%',
           background: user ? 'var(--flz-text)' : 'transparent',
           border: `1.3px solid ${user ? 'var(--flz-text)' : 'rgba(128,128,128,0.35)'}`,
-          cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: 0, transition: 'border-color 0.2s',
+          transition: 'border-color 0.2s',
         }}
-        onMouseEnter={e => {
-          if (!user) e.currentTarget.style.borderColor = 'var(--flz-text)'
-        }}
-        onMouseLeave={e => {
-          if (!user) e.currentTarget.style.borderColor = 'rgba(128,128,128,0.35)'
-        }}
-      >
-        {user
-          ? <span style={{
-              fontFamily: 'Inter, system-ui, sans-serif',
-              fontSize: '0.78rem',
-              color: 'var(--flz-bg)',
-              fontWeight: 500,
-              lineHeight: 1,
-            }}>{initial}</span>
-          : <PersonSVG />
-        }
+          onMouseEnter={e => { if (!user) e.currentTarget.style.borderColor = 'var(--flz-text)' }}
+          onMouseLeave={e => { if (!user) e.currentTarget.style.borderColor = 'rgba(128,128,128,0.35)' }}
+        >
+          {user
+            ? <span style={{
+                fontFamily: 'Inter, system-ui, sans-serif',
+                fontSize: '0.78rem',
+                color: 'var(--flz-bg)',
+                fontWeight: 500,
+                lineHeight: 1,
+              }}>{initial}</span>
+            : <PersonSVG />
+          }
+        </div>
       </button>
 
       {/* Dropdown — logged-in only */}
@@ -80,7 +84,7 @@ export default function ProfileIcon({ user, onSignIn, onHistory, onJournal, onSe
             exit={{ opacity: 0, y: -6, scale: 0.96 }}
             transition={{ duration: 0.18, ease: EASE }}
             style={{
-              position: 'absolute', top: '42px', right: 0,
+              position: 'absolute', top: '48px', right: 0,
               background: 'var(--flz-surface)',
               border: '1px solid var(--flz-border)',
               borderRadius: '4px',
@@ -111,7 +115,7 @@ export default function ProfileIcon({ user, onSignIn, onHistory, onJournal, onSe
               <button key={label} onClick={fn} style={{
                 display: 'block', width: '100%', textAlign: 'left',
                 background: 'none', border: 'none',
-                padding: '10px 14px',
+                padding: '12px 14px',
                 fontFamily: 'Inter, system-ui, sans-serif',
                 fontSize: '0.82rem', color: 'var(--flz-text)',
                 cursor: 'pointer', transition: 'background 0.12s',
