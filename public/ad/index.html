@@ -1,698 +1,1018 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <title>FLZ — Ad</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,200;0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FLZ — Know Yourself Better</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html, body {
-      width: 100%; height: 100%;
-      background: #000;
-      display: flex; align-items: center; justify-content: center;
-      overflow: hidden;
-      font-family: 'Inter', system-ui, sans-serif;
-    }
+html, body {
+  width: 100%; height: 100%;
+  background: #000;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
 
-    /* ── Stage: 1080×1920, scaled to fit ─────────── */
-    #stage {
-      width: 1080px; height: 1920px;
-      background: #060608;
-      position: absolute;
-      top: 0; left: 0;
-      overflow: hidden;
-      transform-origin: top left;
-    }
+/* ── Stage ──────────────────────────────────────── */
+#stage {
+  position: absolute;
+  top: 0; left: 0;
+  width: 1080px; height: 1920px;
+  transform-origin: top left;
+  background-color: #070709;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.042) 1px, transparent 1px);
+  background-size: 32px 32px;
+  overflow: hidden;
+}
 
-    /* ── Star/grain canvas ───────────────────────── */
-    #bgCanvas {
-      position: absolute; inset: 0;
-      width: 100%; height: 100%;
-      pointer-events: none; z-index: 0;
-    }
+/* ── Entrance animations ─────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.fade-up {
+  opacity: 0;
+  transform: translateY(18px);
+  animation: fadeUp 0.85s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 0.75s ease forwards;
+}
+.d1 { animation-delay: 0.15s; }
+.d2 { animation-delay: 0.45s; }
+.d3 { animation-delay: 0.75s; }
+.d4 { animation-delay: 1.05s; }
+.d5 { animation-delay: 1.35s; }
+.d6 { animation-delay: 1.65s; }
+.d7 { animation-delay: 1.95s; }
 
-    /* ── Vignette ────────────────────────────────── */
-    #vignette {
-      position: absolute; inset: 0; z-index: 1; pointer-events: none;
-      background:
-        radial-gradient(ellipse 80% 60% at 50% 50%, transparent 30%, rgba(0,0,0,0.72) 100%),
-        linear-gradient(180deg, rgba(0,0,0,0.5) 0%, transparent 20%, transparent 70%, rgba(0,0,0,0.8) 100%);
-    }
+/* ── Content wrapper ─────────────────────────────── */
+.content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 88px 80px 72px;
+  display: flex;
+  flex-direction: column;
+}
 
-    /* ── Logo area ────────────────────────────────── */
-    #logoArea {
-      position: absolute;
-      top: 112px; left: 80px;
-      z-index: 20;
-    }
-    #logoText {
-      font-size: 72px; font-weight: 200;
-      letter-spacing: -0.045em; color: #fff;
-      line-height: 1;
-      opacity: 0; filter: blur(8px);
-      transform: translateY(10px);
-      transition: opacity 1.2s cubic-bezier(0.16,1,0.3,1),
-                  transform 1.2s cubic-bezier(0.16,1,0.3,1),
-                  filter 1.2s cubic-bezier(0.16,1,0.3,1);
-    }
-    #logoText.in { opacity: 1; transform: translateY(0); filter: blur(0); }
+/* ══════════════════════════════════════════════════
+   SECTION 1 — HERO
+══════════════════════════════════════════════════ */
+.s1 {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-bottom: 44px;
+}
 
-    #taglineText {
-      font-size: 11.5px; font-weight: 400;
-      letter-spacing: 0.21em; text-transform: uppercase;
-      color: rgba(255,255,255,0.28);
-      margin-top: 14px;
-      opacity: 0; transform: translateY(14px);
-      transition: opacity 1s ease 0s, transform 1s cubic-bezier(0.16,1,0.3,1) 0s;
-    }
-    #taglineText.in { opacity: 1; transform: translateY(0); }
+/* Logo mark */
+.logo-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 38px;
+}
+.logo-dot-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 5px);
+  gap: 3.5px;
+}
+.logo-dot-grid span {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+}
+.logo-dot-grid span:nth-child(5) {
+  background: rgba(255,255,255,0.88);
+}
+.logo-wordmark {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  color: rgba(255,255,255,0.38);
+  text-transform: uppercase;
+}
 
-    /* ── Phones container — camera push applied here */
-    #phonesContainer {
-      position: absolute;
-      inset: 0; z-index: 10;
-      transform-origin: 50% 60%;
-    }
-    #phonesContainer.push {
-      transition: transform 8s cubic-bezier(0.25,0.1,0.1,1);
-      transform: scale(1.09) translateY(-22px);
-    }
+/* Hero title */
+.hero-title {
+  font-size: 130px;
+  font-weight: 100;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.95);
+  line-height: 1;
+  margin-bottom: 26px;
+  text-transform: uppercase;
+}
 
-    /* ── Phone base ──────────────────────────────── */
-    .phone {
-      position: absolute;
-      border-radius: 48px;
-      /* Metal frame: gradient to simulate brushed aluminum */
-      background: linear-gradient(
-        150deg,
-        rgba(90,90,95,0.9) 0%,
-        rgba(45,45,48,1) 25%,
-        rgba(28,28,30,1) 55%,
-        rgba(38,38,42,0.95) 80%,
-        rgba(65,65,70,0.8) 100%
-      );
-      padding: 3px;
-      box-shadow:
-        0 0 0 0.5px rgba(255,255,255,0.08),
-        0 60px 140px rgba(0,0,0,0.88),
-        0 24px 56px rgba(0,0,0,0.65),
-        0 8px 20px rgba(0,0,0,0.5),
-        inset 0 1.5px 0 rgba(255,255,255,0.14),
-        inset 0 -1px 0 rgba(0,0,0,0.6);
-      will-change: transform, opacity;
-    }
+/* Tagline */
+.tagline {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  color: rgba(255,255,255,0.3);
+  text-transform: uppercase;
+  margin-bottom: 44px;
+}
 
-    /* Edge reflection — left side */
-    .phone::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 8%; bottom: 8%;
-      width: 3px;
-      background: linear-gradient(180deg,
-        transparent 0%,
-        rgba(255,255,255,0.22) 22%,
-        rgba(255,255,255,0.28) 48%,
-        rgba(255,255,255,0.18) 72%,
-        transparent 100%
-      );
-      border-radius: 3px 0 0 3px;
-      z-index: 6; pointer-events: none;
-    }
-    /* Edge reflection — right side subtle */
-    .phone::after {
-      content: '';
-      position: absolute;
-      right: 0; top: 20%; bottom: 20%;
-      width: 1.5px;
-      background: linear-gradient(180deg,
-        transparent 0%,
-        rgba(255,255,255,0.08) 50%,
-        transparent 100%
-      );
-      border-radius: 0 3px 3px 0;
-      z-index: 6; pointer-events: none;
-    }
+/* Thin divider */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.12) 0%,
+    rgba(255,255,255,0.05) 60%,
+    transparent 100%);
+}
 
-    .phone-inner {
-      width: 100%; height: 100%;
-      background: #080808;
-      border-radius: 45px;
-      overflow: hidden;
-      position: relative;
-    }
+/* ══════════════════════════════════════════════════
+   SECTION 2 — COPY
+══════════════════════════════════════════════════ */
+.s2 {
+  padding: 40px 0 40px;
+  display: flex;
+  flex-direction: column;
+}
 
-    /* Dynamic island */
-    .dynamic-island {
-      position: absolute;
-      top: 14px; left: 50%;
-      transform: translateX(-50%);
-      width: 100px; height: 30px;
-      background: #000;
-      border-radius: 20px;
-      z-index: 15;
-    }
+.copy-main {
+  font-size: 26px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.8);
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  margin-bottom: 18px;
+  max-width: 700px;
+}
 
-    /* ── Secondary phone (analytics) ─────────────── */
-    #phoneSecondary {
-      width: 260px; height: 528px;
-      left: 55px; top: 570px;
-      opacity: 0;
-      transform: perspective(1200px) rotateY(-8deg) rotateX(4deg) translateY(35px);
-      transition: opacity 1.3s ease, transform 1.5s cubic-bezier(0.16,1,0.3,1);
-    }
-    #phoneSecondary.in {
-      opacity: 0.72;
-      transform: perspective(1200px) rotateY(-8deg) rotateX(4deg) translateY(0);
-    }
-    #phoneSecondary.float {
-      animation: floatSecondary 5s ease-in-out infinite;
-    }
-    @keyframes floatSecondary {
-      0%,100% { transform: perspective(1200px) rotateY(-8deg) rotateX(4deg) translateY(0); }
-      50%      { transform: perspective(1200px) rotateY(-8deg) rotateX(4deg) translateY(-10px); }
-    }
+.copy-sub {
+  font-size: 18px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.55;
+  max-width: 640px;
+  margin-bottom: 28px;
+}
 
-    /* ── Primary phone (check-in) ────────────────── */
-    #phonePrimary {
-      width: 310px; height: 630px;
-      left: 380px; top: 660px;
-      opacity: 0;
-      transform: perspective(1200px) rotateY(-6deg) rotateX(3deg) translateY(55px) rotate(0.5deg);
-      transition: opacity 1.1s ease 0.25s, transform 1.4s cubic-bezier(0.16,1,0.3,1) 0.25s;
-    }
-    #phonePrimary.in {
-      opacity: 1;
-      transform: perspective(1200px) rotateY(-6deg) rotateX(3deg) translateY(0) rotate(0.5deg);
-    }
-    #phonePrimary.float {
-      animation: floatPrimary 5s ease-in-out 0.6s infinite;
-    }
-    @keyframes floatPrimary {
-      0%,100% { transform: perspective(1200px) rotateY(-6deg) rotateX(3deg) translateY(0) rotate(0.5deg); }
-      50%      { transform: perspective(1200px) rotateY(-6deg) rotateX(3deg) translateY(-13px) rotate(0.5deg); }
-    }
+.dims-row {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+}
+.dim-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.36);
+}
+.dim-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
 
-    /* ── Screen content base ─────────────────────── */
-    .screen-pad {
-      position: absolute;
-      inset: 0;
-      padding: 54px 18px 20px;
-      overflow: hidden;
-    }
+/* ══════════════════════════════════════════════════
+   SECTION 3 — PHONES
+══════════════════════════════════════════════════ */
+.s3 {
+  position: relative;
+  height: 636px;
+  flex-shrink: 0;
+  margin: 0 -20px;
+}
 
-    /* ── Primary screen: check-in ────────────────── */
-    #primScreen { background: #070709; }
+/* Phone shell */
+.phone {
+  position: absolute;
+  border-radius: 38px;
+  background: linear-gradient(150deg,
+    rgba(88,88,94,0.88) 0%,
+    rgba(44,44,47,1) 22%,
+    rgba(20,20,22,1) 52%,
+    rgba(34,34,37,0.95) 78%,
+    rgba(62,62,67,0.78) 100%);
+  padding: 3px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.06),
+    0 32px 80px rgba(0,0,0,0.85),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+}
+.phone-inner {
+  width: 100%; height: 100%;
+  border-radius: 36px;
+  background: #0d0d10;
+  overflow: hidden;
+  position: relative;
+}
+/* Dynamic island */
+.d-island {
+  position: absolute;
+  top: 13px; left: 50%;
+  transform: translateX(-50%);
+  width: 108px; height: 29px;
+  background: #000;
+  border-radius: 20px;
+  z-index: 10;
+}
 
-    .p-statusbar {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 0 4px; margin-bottom: 28px;
-    }
-    .p-time {
-      font-size: 12px; font-weight: 500;
-      color: rgba(255,255,255,0.7); letter-spacing: -0.01em;
-    }
-    .p-icons { display: flex; gap: 5px; align-items: center; }
-    .p-icon {
-      width: 14px; height: 8px;
-      background: rgba(255,255,255,0.55);
-      border-radius: 2px;
-    }
-    .p-icon.signal { width: 12px; background: transparent;
-      border-right: 2px solid rgba(255,255,255,0.55);
-      border-left: 2px solid rgba(255,255,255,0.55); }
+/* ── Back phone (phoneB) — Growth History ────────── */
+#phoneB {
+  width: 270px; height: 554px;
+  left: 152px; top: 56px;
+  opacity: 0.7;
+  transform: perspective(1400px) rotateY(-12deg) rotateX(4deg);
+  transform-origin: center center;
+  z-index: 1;
+}
 
-    .p-logo {
-      font-size: 15px; font-weight: 300; letter-spacing: -0.025em;
-      color: rgba(255,255,255,0.35); margin-bottom: 38px;
-    }
+.pb-header {
+  padding: 56px 18px 0;
+}
+.pb-app-name {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.28);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.pb-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: -0.01em;
+  margin-bottom: 3px;
+}
+.pb-subtitle {
+  font-size: 10px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 0.02em;
+}
 
-    .p-question {
-      font-size: 18.5px; font-weight: 300; letter-spacing: -0.03em;
-      color: rgba(255,255,255,0.9); line-height: 1.38;
-      margin-bottom: 30px;
-      opacity: 0; transform: translateY(6px);
-      transition: opacity 0.7s ease, transform 0.7s ease;
-    }
-    .p-question.in { opacity: 1; transform: translateY(0); }
+/* Mini calendar */
+.mini-cal {
+  margin: 14px 18px 0;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 10px 10px 8px;
+}
+.cal-month {
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  color: rgba(255,255,255,0.32);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+.cal-day {
+  width: 18px; height: 18px;
+  border-radius: 5px;
+  font-size: 7px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.28);
+  display: flex; align-items: center; justify-content: center;
+  background: transparent;
+}
+.cal-day.filled {
+  background: rgba(198,167,255,0.12);
+  color: rgba(198,167,255,0.65);
+}
+.cal-day.today {
+  background: rgba(198,167,255,0.32);
+  color: #C6A7FF;
+  font-weight: 600;
+}
 
-    .p-input-area {
-      border-bottom: 1px solid rgba(255,255,255,0.12);
-      padding-bottom: 14px; margin-bottom: 10px;
-      min-height: 52px;
-      transition: box-shadow 0.25s ease, border-color 0.25s ease;
-    }
-    .p-input-area.glow {
-      border-color: rgba(255,255,255,0.22);
-      box-shadow: 0 4px 20px rgba(255,255,255,0.025);
-    }
+/* Chart area */
+.mini-chart {
+  margin: 10px 18px 0;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 12px 10px 10px;
+}
+.chart-label {
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.26);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.chart-svg {
+  width: 100%;
+  height: 64px;
+  overflow: visible;
+}
+.chart-legend {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 7px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.32);
+  letter-spacing: 0.08em;
+}
+.legend-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
 
-    .p-typed {
-      font-size: 15.5px; font-weight: 300; letter-spacing: -0.02em;
-      color: rgba(255,255,255,0.82); line-height: 1.55;
-    }
-    .p-cursor {
-      display: inline-block; width: 1.5px; height: 1em;
-      background: rgba(255,255,255,0.65);
-      margin-left: 1px; vertical-align: middle;
-      animation: blink 0.88s step-end infinite;
-    }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+/* Focus tags */
+.focus-tags {
+  margin: 10px 18px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.focus-tag {
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  color: rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 6px;
+  padding: 4px 9px;
+}
+.focus-tag.active {
+  background: rgba(198,167,255,0.09);
+  border-color: rgba(198,167,255,0.22);
+  color: rgba(198,167,255,0.72);
+}
 
-    .p-hint {
-      font-size: 11px; letter-spacing: 0.02em;
-      color: rgba(255,255,255,0.16);
-    }
+/* ── Front phone (phoneA) — Check-in ─────────────── */
+#phoneA {
+  width: 310px; height: 614px;
+  left: 392px; top: 0;
+  transform: perspective(1400px) rotateY(-5deg) rotateX(2deg);
+  transform-origin: center center;
+  z-index: 2;
+}
 
-    /* Pulse ring on completion */
-    .pulse-ring {
-      position: absolute;
-      left: 50%; top: 45%;
-      transform: translate(-50%,-50%) scale(0.5);
-      width: 80px; height: 80px;
-      border-radius: 50%;
-      border: 1px solid rgba(255,255,255,0.18);
-      opacity: 0;
-      animation: pulseOut 1.3s cubic-bezier(0.4,0,0.2,1) forwards;
-      pointer-events: none; z-index: 20;
-    }
-    @keyframes pulseOut {
-      0%   { transform: translate(-50%,-50%) scale(0.4); opacity: 0.5; }
-      100% { transform: translate(-50%,-50%) scale(4.5); opacity: 0; }
-    }
+.pa-header {
+  padding: 56px 20px 0;
+}
+.pa-greeting {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  color: rgba(255,255,255,0.28);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.pa-question {
+  font-size: 17px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.88);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin-bottom: 18px;
+}
 
-    /* Result area on primary phone */
-    #primResult {
-      margin-top: 22px;
-      opacity: 0;
-      transform: translateY(8px);
-      transition: opacity 0.7s ease, transform 0.7s ease;
-    }
-    #primResult.in { opacity: 1; transform: translateY(0); }
+/* Input box */
+.pa-input {
+  margin: 0 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 12px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.45;
+  font-family: 'Inter', sans-serif;
+}
+.pa-cursor {
+  display: inline-block;
+  width: 1.5px; height: 13px;
+  background: rgba(198,167,255,0.7);
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: blink 1.1s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
 
-    .r-state {
-      font-size: 13px; font-weight: 400; letter-spacing: -0.015em;
-      color: rgba(255,255,255,0.75); margin-bottom: 14px;
-    }
-    .r-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .r-row span:first-child {
-      font-size: 9.5px; letter-spacing: 0.09em;
-      text-transform: uppercase; color: rgba(255,255,255,0.26);
-    }
-    .r-row span:last-child { font-size: 10.5px; font-weight: 500; }
+/* Insight cards */
+.insight-row {
+  margin: 14px 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.insight-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.insight-card.accent {
+  background: rgba(198,167,255,0.04);
+  border-color: rgba(198,167,255,0.14);
+}
+.insight-icon {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+  color: rgba(255,255,255,0.4);
+}
+.insight-card.accent .insight-icon {
+  background: rgba(198,167,255,0.12);
+  color: rgba(198,167,255,0.7);
+}
+.insight-label {
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.28);
+  margin-bottom: 2px;
+}
+.insight-text {
+  font-size: 11px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.35;
+}
+.insight-card.accent .insight-text {
+  color: rgba(198,167,255,0.75);
+}
 
-    /* ── Secondary screen: analytics ────────────── */
-    #secScreen { background: #060608; }
+/* Metric bars */
+.metric-bars {
+  margin: 12px 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.metric-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.metric-name {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  width: 52px;
+  flex-shrink: 0;
+}
+.metric-track {
+  flex: 1;
+  height: 4px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.metric-fill {
+  height: 100%;
+  border-radius: 2px;
+}
+.metric-val {
+  font-size: 9px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.32);
+  width: 22px;
+  text-align: right;
+  flex-shrink: 0;
+}
 
-    /* Vertical mask reveal */
-    #secMask {
-      position: absolute; inset: 0;
-      clip-path: inset(100% 0 0 0);
-      transition: clip-path 1.4s cubic-bezier(0.16,1,0.3,1);
-    }
-    #secMask.in { clip-path: inset(0% 0 0 0); }
+/* ══════════════════════════════════════════════════
+   SECTION 4 — PRICING
+══════════════════════════════════════════════════ */
+.s4 {
+  padding-top: 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
 
-    .b-logo {
-      font-size: 13px; font-weight: 300; letter-spacing: -0.02em;
-      color: rgba(255,255,255,0.3); margin-bottom: 22px;
-    }
-    .b-header {
-      font-size: 16px; font-weight: 300; letter-spacing: -0.025em;
-      color: rgba(255,255,255,0.78); margin-bottom: 5px;
-    }
-    .b-sub {
-      font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase;
-      color: rgba(255,255,255,0.22); margin-bottom: 16px;
-    }
-    .b-streak {
-      display: inline-flex; align-items: center; gap: 5px;
-      font-size: 9.5px; color: rgba(255,255,255,0.38);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 4px; padding: 4px 10px; margin-bottom: 18px;
-    }
+.section-eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  color: rgba(255,255,255,0.22);
+  text-transform: uppercase;
+}
 
-    /* Chart */
-    .b-chart-wrap {
-      width: 100%; margin-bottom: 16px; position: relative;
-    }
-    .b-chart-svg { width: 100%; display: block; }
+.pricing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
 
-    /* Animated chart lines */
-    .chart-line {
-      fill: none; stroke-width: 1.8;
-      stroke-linecap: round; stroke-linejoin: round;
-      stroke-dasharray: 260;
-      stroke-dashoffset: 260;
-      transition: stroke-dashoffset 1.1s cubic-bezier(0.4,0,0.2,1);
-    }
-    .chart-line.draw { stroke-dashoffset: 0; }
+.price-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 26px 22px;
+  position: relative;
+}
+.price-card.pro {
+  background: rgba(198,167,255,0.025);
+  border-color: rgba(198,167,255,0.18);
+}
 
-    /* Chart label row */
-    .b-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 6.5px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      opacity: 0; transform: translateX(-6px);
-      transition: opacity 0.5s ease, transform 0.5s ease;
-    }
-    .b-row.in { opacity: 1; transform: translateX(0); }
-    .b-row span:first-child {
-      font-size: 9px; letter-spacing: 0.09em;
-      text-transform: uppercase; color: rgba(255,255,255,0.25);
-    }
-    .b-row span:last-child { font-size: 10px; font-weight: 500; }
+.popular-badge {
+  position: absolute;
+  top: -11px; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(198,167,255,0.14);
+  border: 1px solid rgba(198,167,255,0.28);
+  border-radius: 20px;
+  padding: 3px 13px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: #C6A7FF;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
 
-    /* Light sweep on secondary */
-    #secSweep {
-      position: absolute; inset: 0; z-index: 4; pointer-events: none;
-      background: linear-gradient(
-        120deg,
-        transparent 20%,
-        rgba(255,255,255,0.045) 50%,
-        transparent 80%
-      );
-      transform: translateX(-160%);
-      transition: transform 1.6s cubic-bezier(0.4,0,0.2,1);
-    }
-    #secSweep.in { transform: translateX(160%); }
+.card-tier {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.32);
+  margin-bottom: 12px;
+}
+.price-card.pro .card-tier {
+  color: rgba(198,167,255,0.5);
+}
 
-    /* ── Fade overlay ────────────────────────────── */
-    #fade {
-      position: absolute; inset: 0;
-      background: #000; opacity: 0;
-      pointer-events: none; z-index: 98;
-      transition: opacity 1.1s ease;
-    }
-    #fade.in { opacity: 1; }
-  </style>
+.card-price {
+  font-size: 36px;
+  font-weight: 200;
+  color: rgba(255,255,255,0.86);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+.price-card.pro .card-price {
+  color: #C6A7FF;
+}
+.card-period {
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.26);
+  margin-bottom: 4px;
+}
+.card-save {
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(198,167,255,0.6);
+  background: rgba(198,167,255,0.07);
+  border-radius: 4px;
+  padding: 2px 7px;
+  display: inline-block;
+  margin-bottom: 16px;
+}
+.card-spacer { height: 30px; }
+
+.card-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+  margin-bottom: 14px;
+}
+.price-card.pro .card-divider {
+  background: rgba(198,167,255,0.1);
+}
+
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+}
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 11.5px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.3;
+}
+.price-card.pro .feature-item {
+  color: rgba(255,255,255,0.68);
+}
+.feat-check {
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.price-card.pro .feat-check {
+  background: rgba(198,167,255,0.14);
+}
+.feat-check svg {
+  width: 7px; height: 7px;
+}
+
+/* ══════════════════════════════════════════════════
+   SECTION 5 — CTA
+══════════════════════════════════════════════════ */
+.s5 {
+  margin-top: auto;
+  padding-top: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.cta-btn {
+  width: 100%;
+  height: 72px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.94);
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: #07070a;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.2),
+    0 8px 32px rgba(0,0,0,0.5);
+}
+
+.cta-free {
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.28);
+  letter-spacing: 0.04em;
+}
+
+.cta-domain {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.28em;
+  color: rgba(255,255,255,0.13);
+  text-transform: uppercase;
+}
+</style>
 </head>
 <body>
-
 <div id="stage">
-  <canvas id="bgCanvas"></canvas>
-  <div id="vignette"></div>
+<div class="content">
 
-  <!-- Logo -->
-  <div id="logoArea">
-    <div id="logoText">FLZ.</div>
-    <div id="taglineText">KNOW YOURSELF BETTER</div>
+  <!-- ══ S1: HERO ══════════════════════════════════ -->
+  <div class="s1">
+
+    <div class="logo-mark fade-up d1">
+      <div class="logo-dot-grid">
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+      </div>
+      <span class="logo-wordmark">FLZ App</span>
+    </div>
+
+    <div class="hero-title fade-up d2">FLZ.</div>
+
+    <div class="tagline fade-up d3">Know Yourself Better</div>
+
+    <div class="divider fade-in d3"></div>
+
   </div>
 
-  <!-- Phones -->
-  <div id="phonesContainer">
+  <!-- ══ S2: COPY ═══════════════════════════════════ -->
+  <div class="s2">
+    <div class="copy-main fade-up d3">
+      Daily AI check-ins that reveal what's happening beneath the surface.
+    </div>
+    <div class="copy-sub fade-up d4">
+      Track your Energy, Emotion, and Clarity over time — and finally understand why you feel the way you feel.
+    </div>
+    <div class="dims-row fade-in d4">
+      <div class="dim-pill">
+        <div class="dim-dot" style="background:#F5A623;"></div>Energy
+      </div>
+      <div class="dim-pill">
+        <div class="dim-dot" style="background:#6B6BFF;"></div>Emotion
+      </div>
+      <div class="dim-pill">
+        <div class="dim-dot" style="background:#00D8A7;"></div>Clarity
+      </div>
+    </div>
+  </div>
 
-    <!-- Secondary phone: analytics -->
-    <div id="phoneSecondary" class="phone">
+  <!-- ══ S3: PHONES ════════════════════════════════ -->
+  <div class="s3 fade-in d4">
+
+    <!-- Back phone: Growth History -->
+    <div class="phone" id="phoneB">
       <div class="phone-inner">
-        <div class="dynamic-island"></div>
-        <div id="secScreen" class="screen-pad">
-          <div id="secSweep"></div>
-          <div id="secMask" class="screen-pad" style="padding-top:54px">
-            <div class="b-logo">FLZ.</div>
-            <div class="b-header">Growth history</div>
-            <div class="b-sub">7 moments recorded</div>
-            <div class="b-streak">🔥 7 day streak</div>
+        <div class="d-island"></div>
 
-            <div class="b-chart-wrap">
-              <svg class="b-chart-svg" viewBox="0 0 224 68" xmlns="http://www.w3.org/2000/svg">
-                <!-- grid -->
-                <line x1="0" y1="17" x2="224" y2="17" stroke="rgba(255,255,255,0.04)" stroke-width="0.5"/>
-                <line x1="0" y1="34" x2="224" y2="34" stroke="rgba(255,255,255,0.04)" stroke-width="0.5"/>
-                <line x1="0" y1="51" x2="224" y2="51" stroke="rgba(255,255,255,0.04)" stroke-width="0.5"/>
-                <!-- area fills -->
-                <polyline points="0,54 37,46 74,42 111,28 148,32 185,18 224,13"
-                  fill="none" class="chart-line" id="lineEnergy" stroke="#f59e0b"/>
-                <polyline points="0,50 37,52 74,38 111,42 148,24 185,28 224,18"
-                  fill="none" class="chart-line" id="lineEmotion" stroke="#818cf8"/>
-                <polyline points="0,58 37,54 74,52 111,46 148,38 185,24 224,16"
-                  fill="none" class="chart-line" id="lineClarity" stroke="#34d399"/>
-              </svg>
-            </div>
+        <div class="pb-header">
+          <div class="pb-app-name">FLZ</div>
+          <div class="pb-title">Growth History</div>
+          <div class="pb-subtitle">Last 30 days</div>
+        </div>
 
-            <div class="b-row" id="bRow0">
-              <span>Energy</span><span style="color:#f59e0b">High</span>
-            </div>
-            <div class="b-row" id="bRow1">
-              <span>Emotion</span><span style="color:#818cf8">Positive</span>
-            </div>
-            <div class="b-row" id="bRow2">
-              <span>Clarity</span><span style="color:#34d399">Focused</span>
-            </div>
+        <div class="mini-cal">
+          <div class="cal-month">May 2026</div>
+          <div class="cal-grid">
+            <div class="cal-day" style="color:rgba(255,255,255,0.18);font-size:6px;">S</div>
+            <div class="cal-day" style="color:rgba(255,255,255,0.18);font-size:6px;">M</div>
+            <div class="cal-day" style="color:rgba(255,255,255,0.18);font-size:6px;">T</div>
+            <div class="cal-day" style="color:rgba(255,255,255,0.18);font-size:6px;">W</div>
+            <div class="cal-day" style="color:rgba(255,255,255,0.18);font-size:6px;">T</div>
+            <div class="cal-day" style="color:rgba(255,255,255,0.18);font-size:6px;">F</div>
+            <div class="cal-day" style="color:rgba(255,255,255,0.18);font-size:6px;">S</div>
+            <div class="cal-day"></div>
+            <div class="cal-day"></div>
+            <div class="cal-day"></div>
+            <div class="cal-day filled">1</div>
+            <div class="cal-day filled">2</div>
+            <div class="cal-day filled">3</div>
+            <div class="cal-day filled">4</div>
+            <div class="cal-day filled">5</div>
+            <div class="cal-day filled">6</div>
+            <div class="cal-day filled">7</div>
+            <div class="cal-day filled">8</div>
+            <div class="cal-day filled">9</div>
+            <div class="cal-day filled">10</div>
+            <div class="cal-day">11</div>
+            <div class="cal-day filled">12</div>
+            <div class="cal-day filled">13</div>
+            <div class="cal-day filled">14</div>
+            <div class="cal-day filled">15</div>
+            <div class="cal-day filled">16</div>
+            <div class="cal-day filled">17</div>
+            <div class="cal-day filled">18</div>
+            <div class="cal-day filled">19</div>
+            <div class="cal-day filled">20</div>
+            <div class="cal-day filled">21</div>
+            <div class="cal-day filled">22</div>
+            <div class="cal-day today">23</div>
+            <div class="cal-day">24</div>
+            <div class="cal-day">25</div>
           </div>
         </div>
+
+        <div class="mini-chart">
+          <div class="chart-label">30-day Trend</div>
+          <svg class="chart-svg" viewBox="0 0 214 64" preserveAspectRatio="none">
+            <line x1="0" y1="16" x2="214" y2="16" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+            <line x1="0" y1="32" x2="214" y2="32" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+            <line x1="0" y1="48" x2="214" y2="48" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+            <polyline
+              points="0,42 26,38 52,30 78,34 104,22 130,18 156,26 182,20 214,14"
+              fill="none" stroke="#F5A623" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round" opacity="0.82"/>
+            <polyline
+              points="0,50 26,44 52,46 78,40 104,36 130,40 156,32 182,28 214,24"
+              fill="none" stroke="#6B6BFF" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round" opacity="0.82"/>
+            <polyline
+              points="0,58 26,52 52,54 78,46 104,44 130,38 156,36 182,32 214,22"
+              fill="none" stroke="#00D8A7" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round" opacity="0.82"/>
+          </svg>
+          <div class="chart-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#F5A623;"></div>Energy</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#6B6BFF;"></div>Emotion</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#00D8A7;"></div>Clarity</div>
+          </div>
+        </div>
+
+        <div class="focus-tags">
+          <div class="focus-tag active">Career</div>
+          <div class="focus-tag active">Relationships</div>
+          <div class="focus-tag">Fitness</div>
+          <div class="focus-tag active">Learning</div>
+          <div class="focus-tag">Sleep</div>
+        </div>
+
       </div>
     </div>
 
-    <!-- Primary phone: check-in -->
-    <div id="phonePrimary" class="phone">
+    <!-- Front phone: Check-in -->
+    <div class="phone" id="phoneA">
       <div class="phone-inner">
-        <div class="dynamic-island"></div>
-        <div id="primScreen" class="screen-pad">
-          <div class="p-statusbar">
-            <span class="p-time">9:41</span>
-            <div class="p-icons">
-              <div class="p-icon signal"></div>
-              <div class="p-icon" style="width:10px;height:7px;border-radius:1px;background:rgba(255,255,255,0.5)"></div>
-              <div class="p-icon" style="width:18px;height:8px;border-radius:2px;background:linear-gradient(90deg,rgba(255,255,255,0.55) 75%,transparent 75%);outline:1px solid rgba(255,255,255,0.3)"></div>
+        <div class="d-island"></div>
+
+        <div class="pa-header">
+          <div class="pa-greeting">Good evening, Tobi</div>
+          <div class="pa-question">What's on your mind right now?</div>
+        </div>
+
+        <div class="pa-input">
+          Feeling scattered after back-to-back meetings. Not sure if it's fatigue or something deeper<span class="pa-cursor"></span>
+        </div>
+
+        <div class="insight-row">
+          <div class="insight-card accent">
+            <div class="insight-icon">✦</div>
+            <div class="insight-body">
+              <div class="insight-label">AI Insight</div>
+              <div class="insight-text">This matches low Clarity days. Your energy tends to recover after 9pm.</div>
             </div>
           </div>
-
-          <div class="p-logo">FLZ.</div>
-
-          <div class="p-question" id="pQuestion">
-            What's on your<br>mind, Tobi?
-          </div>
-
-          <div class="p-input-area" id="pInputArea">
-            <div class="p-typed" id="pTyped"><span class="p-cursor"></span></div>
-          </div>
-          <div class="p-hint">Share how you're feeling</div>
-
-          <div id="primResult">
-            <div class="r-state">Restless Mind</div>
-            <div class="r-row"><span>Energy</span><span style="color:#f59e0b">Low</span></div>
-            <div class="r-row"><span>Emotion</span><span style="color:#818cf8">Neutral</span></div>
-            <div class="r-row"><span>Clarity</span><span style="color:#34d399">Confused</span></div>
+          <div class="insight-card">
+            <div class="insight-icon">◎</div>
+            <div class="insight-body">
+              <div class="insight-label">Pattern</div>
+              <div class="insight-text">Meeting-heavy days lower Clarity by ~18 points on average.</div>
+            </div>
           </div>
         </div>
+
+        <div class="metric-bars">
+          <div class="metric-row">
+            <div class="metric-name">Energy</div>
+            <div class="metric-track">
+              <div class="metric-fill" style="width:62%;background:#F5A623;opacity:0.78;"></div>
+            </div>
+            <div class="metric-val">62</div>
+          </div>
+          <div class="metric-row">
+            <div class="metric-name">Emotion</div>
+            <div class="metric-track">
+              <div class="metric-fill" style="width:74%;background:#6B6BFF;opacity:0.82;"></div>
+            </div>
+            <div class="metric-val">74</div>
+          </div>
+          <div class="metric-row">
+            <div class="metric-name">Clarity</div>
+            <div class="metric-track">
+              <div class="metric-fill" style="width:48%;background:#00D8A7;opacity:0.75;"></div>
+            </div>
+            <div class="metric-val">48</div>
+          </div>
+        </div>
+
       </div>
     </div>
 
-  </div><!-- /phonesContainer -->
+  </div>
 
-  <div id="fade"></div>
+  <!-- ══ S4: PRICING ══════════════════════════════ -->
+  <div class="s4">
+    <div class="section-eyebrow fade-up d5">Plans</div>
+
+    <div class="pricing-grid fade-up d5">
+
+      <!-- Free card -->
+      <div class="price-card">
+        <div class="card-tier">Free</div>
+        <div class="card-price">$0</div>
+        <div class="card-period">Forever free</div>
+        <div class="card-spacer"></div>
+        <div class="card-divider"></div>
+        <ul class="feature-list">
+          <li class="feature-item">
+            <div class="feat-check"><svg viewBox="0 0 7 7" fill="none"><polyline points="1,3.5 2.8,5.5 6,1.5" stroke="rgba(255,255,255,0.4)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Daily check-ins
+          </li>
+          <li class="feature-item">
+            <div class="feat-check"><svg viewBox="0 0 7 7" fill="none"><polyline points="1,3.5 2.8,5.5 6,1.5" stroke="rgba(255,255,255,0.4)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Energy tracking
+          </li>
+          <li class="feature-item">
+            <div class="feat-check"><svg viewBox="0 0 7 7" fill="none"><polyline points="1,3.5 2.8,5.5 6,1.5" stroke="rgba(255,255,255,0.4)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Emotion tracking
+          </li>
+          <li class="feature-item">
+            <div class="feat-check"><svg viewBox="0 0 7 7" fill="none"><polyline points="1,3.5 2.8,5.5 6,1.5" stroke="rgba(255,255,255,0.4)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Clarity tracking
+          </li>
+          <li class="feature-item">
+            <div class="feat-check"><svg viewBox="0 0 7 7" fill="none"><polyline points="1,3.5 2.8,5.5 6,1.5" stroke="rgba(255,255,255,0.4)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            7-day history
+          </li>
+          <li class="feature-item">
+            <div class="feat-check"><svg viewBox="0 0 7 7" fill="none"><polyline points="1,3.5 2.8,5.5 6,1.5" stroke="rgba(255,255,255,0.4)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Basic insights
+          </li>
+          <li class="feature-item">
+            <div class="feat-check"><svg viewBox="0 0 7 7" fill="none"><polyline points="1,3.5 2.8,5.5 6,1.5" stroke="rgba(255,255,255,0.4)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Focus tags
+          </li>
+          <li class="feature-item">
+            <div class="feat-check"><svg viewBox="0 0 7 7" fill="none"><polyline points="1,3.5 2.8,5.5 6,1.5" stroke="rgba(255,255,255,0.4)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Weekly summary
+          </li>
+        </ul>
+      </div>
+
+      <!-- Pro card -->
+      <div class="price-card pro">
+        <div class="popular-badge">Most Popular</div>
+        <div class="card-tier">Pro</div>
+        <div class="card-price">$8</div>
+        <div class="card-period">/month</div>
+        <div class="card-save">$72/yr · Save 25%</div>
+        <div class="card-divider"></div>
+        <ul class="feature-list">
+          <li class="feature-item">
+            <div class="feat-check"><svg viewBox="0 0 7 7" fill="none"><polyline points="1,3.5 2.8,5.5 6,1.5" stroke="rgba(198,167,255,0.65)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Everything in Free
+          </li>
+          <li class="feature-item">
+            <div class="feat-check"><svg viewBox="0 0 7 7" fill="none"><polyline points="1,3.5 2.8,5.5 6,1.5" stroke="rgba(198,167,255,0.65)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Unlimited history
+          </li>
+          <li class="feature-item">
+            <div class="feat-check"><svg viewBox="0 0 7 7" fill="none"><polyline points="1,3.5 2.8,5.5 6,1.5" stroke="rgba(198,167,255,0.65)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            AI pattern analysis
+          </li>
+          <li class="feature-item">
+            <div class="feat-check"><svg viewBox="0 0 7 7" fill="none"><polyline points="1,3.5 2.8,5.5 6,1.5" stroke="rgba(198,167,255,0.65)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Trend forecasting
+          </li>
+          <li class="feature-item">
+            <div class="feat-check"><svg viewBox="0 0 7 7" fill="none"><polyline points="1,3.5 2.8,5.5 6,1.5" stroke="rgba(198,167,255,0.65)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Deep dive reports
+          </li>
+          <li class="feature-item">
+            <div class="feat-check"><svg viewBox="0 0 7 7" fill="none"><polyline points="1,3.5 2.8,5.5 6,1.5" stroke="rgba(198,167,255,0.65)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Priority AI access
+          </li>
+          <li class="feature-item">
+            <div class="feat-check"><svg viewBox="0 0 7 7" fill="none"><polyline points="1,3.5 2.8,5.5 6,1.5" stroke="rgba(198,167,255,0.65)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Export your data
+          </li>
+          <li class="feature-item">
+            <div class="feat-check"><svg viewBox="0 0 7 7" fill="none"><polyline points="1,3.5 2.8,5.5 6,1.5" stroke="rgba(198,167,255,0.65)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Custom reminders
+          </li>
+          <li class="feature-item">
+            <div class="feat-check"><svg viewBox="0 0 7 7" fill="none"><polyline points="1,3.5 2.8,5.5 6,1.5" stroke="rgba(198,167,255,0.65)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Early features
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ S5: CTA ═══════════════════════════════════ -->
+  <div class="s5 fade-up d6">
+    <button class="cta-btn">Start understanding yourself</button>
+    <div class="cta-free">Free to start · No credit card needed</div>
+    <div class="cta-domain">feelz.chat</div>
+  </div>
+
+</div>
 </div>
 
 <script>
 ;(function() {
-
-// ── Fit stage to viewport ────────────────────────────────────────────────────
-function fitStage() {
-  var s  = document.getElementById('stage')
-  var sx = window.innerWidth  / 1080
-  var sy = window.innerHeight / 1920
-  var sc = Math.min(sx, sy)
-  s.style.transform  = 'scale(' + sc + ')'
-  s.style.marginLeft = ((window.innerWidth  - 1080 * sc) / 2) + 'px'
-  s.style.marginTop  = ((window.innerHeight - 1920 * sc) / 2) + 'px'
-}
-fitStage()
-window.addEventListener('resize', fitStage)
-
-// ── Star + grain canvas ──────────────────────────────────────────────────────
-;(function() {
-  var canvas = document.getElementById('bgCanvas')
-  canvas.width = 1080; canvas.height = 1920
-  var ctx = canvas.getContext('2d')
-
-  var grd = ctx.createRadialGradient(540,800,0, 540,800,1100)
-  grd.addColorStop(0, 'rgba(16,14,22,1)')
-  grd.addColorStop(1, 'rgba(4,4,6,1)')
-  ctx.fillStyle = grd
-  ctx.fillRect(0,0,1080,1920)
-
-  var starData = [
-    { n:120, rMin:0.4, rMax:1.2, oMin:0.06, oMax:0.18 },
-    { n:60,  rMin:1.2, rMax:2.0, oMin:0.08, oMax:0.22 },
-    { n:12,  rMin:2.0, rMax:3.2, oMin:0.12, oMax:0.30 },
-  ]
-  starData.forEach(function(d) {
-    for (var i=0; i<d.n; i++) {
-      var x = Math.random()*1080, y = Math.random()*1920
-      var r = d.rMin + Math.random()*(d.rMax-d.rMin)
-      var o = d.oMin + Math.random()*(d.oMax-d.oMin)
-      var g2 = ctx.createRadialGradient(x,y,0,x,y,r*3)
-      g2.addColorStop(0, 'rgba(220,225,255,'+o+')')
-      g2.addColorStop(1, 'rgba(0,0,0,0)')
-      ctx.beginPath(); ctx.arc(x,y,r*3,0,Math.PI*2)
-      ctx.fillStyle = g2; ctx.fill()
-    }
-  })
-
-  for (var i=0; i<22000; i++) {
-    var x = Math.random()*1080, y = Math.random()*1920
-    ctx.fillStyle = 'rgba(255,255,255,'+(Math.random()*0.038)+')'
-    ctx.fillRect(x,y,1,1)
+  function fitStage() {
+    var s  = document.getElementById('stage')
+    var sx = window.innerWidth  / 1080
+    var sy = window.innerHeight / 1920
+    var sc = Math.min(sx, sy)
+    s.style.transform  = 'scale(' + sc + ')'
+    s.style.marginLeft = ((window.innerWidth  - 1080 * sc) / 2) + 'px'
+    s.style.marginTop  = ((window.innerHeight - 1920 * sc) / 2) + 'px'
   }
+  fitStage()
+  window.addEventListener('resize', fitStage)
 })()
-
-// ── Helpers (function declarations = hoisted, no TDZ) ────────────────────────
-function $(id) { return document.getElementById(id) }
-function t(ms) { return new Promise(function(r) { setTimeout(r, ms) }) }
-function add(el, c) { el.classList.add(c) }
-function rem(el, c) { el.classList.remove(c) }
-
-// ── Human-rhythm typing ──────────────────────────────────────────────────────
-function humanType(el, text, onWord) {
-  return new Promise(function(resolve) {
-    el.innerHTML = '<span class="p-cursor"></span>'
-    var cursor = el.querySelector('.p-cursor')
-    var i = 0, prevChar = ''
-    function next() {
-      if (i >= text.length) { resolve(); return }
-      var char = text[i]
-      cursor.insertAdjacentText('beforebegin', char)
-      i++
-      if ((char === ' ' || i === text.length) && onWord) onWord()
-      var delay = 48 + Math.random() * 52
-      if (prevChar === ' ') delay += 30
-      if (char === ' ')     delay += 20
-      if (Math.random() < 0.07) delay += 160
-      if (i > 3 && i < text.length - 3) delay -= 8
-      prevChar = char
-      setTimeout(next, Math.max(28, delay))
-    }
-    setTimeout(next, 180)
-  })
-}
-
-// ── Pulse ring ───────────────────────────────────────────────────────────────
-function spawnPulse(container) {
-  var ring = document.createElement('div')
-  ring.className = 'pulse-ring'
-  container.appendChild(ring)
-  setTimeout(function() { ring.remove() }, 1400)
-}
-
-// ── Reset ────────────────────────────────────────────────────────────────────
-function resetAll() {
-  ['logoText','taglineText','phoneSecondary','phonePrimary',
-   'secMask','secSweep','pQuestion','primResult','fade',
-   'bRow0','bRow1','bRow2'].forEach(function(id) { rem($(id), 'in') })
-
-  rem($('phonePrimary'), 'float')
-  rem($('phoneSecondary'), 'float')
-  rem($('phonesContainer'), 'push')
-  rem($('pInputArea'), 'glow')
-
-  $('pTyped').innerHTML = '<span class="p-cursor"></span>'
-
-  // Reset chart lines — clear inline styles so CSS defaults take over
-  ;['lineEnergy','lineEmotion','lineClarity'].forEach(function(id) {
-    var el = $(id)
-    el.style.transition = 'none'
-    el.style.strokeDashoffset = '260'
-  })
-
-  document.querySelectorAll('.pulse-ring').forEach(function(e) { e.remove() })
-}
-
-// ── Animation sequence ───────────────────────────────────────────────────────
-async function run() {
-  resetAll()
-  await t(300)
-
-  // 1. Logo
-  add($('logoText'), 'in')
-  await t(700)
-
-  // 2. Tagline
-  $('taglineText').style.transition = 'opacity 1s ease, transform 1s cubic-bezier(0.16,1,0.3,1)'
-  add($('taglineText'), 'in')
-  await t(750)
-
-  // 3. Secondary phone
-  add($('phoneSecondary'), 'in')
-  await t(350)
-
-  // 4. Primary phone
-  add($('phonePrimary'), 'in')
-  await t(650)
-
-  // 5. Camera push
-  add($('phonesContainer'), 'push')
-
-  // 6. Question
-  add($('pQuestion'), 'in')
-  await t(800)
-
-  // 7. Cursor blink pause
-  await t(900)
-
-  // 8. Typing
-  await humanType($('pTyped'), 'feeling scattered and low energy today', function() {
-    add($('pInputArea'), 'glow')
-    setTimeout(function() { rem($('pInputArea'), 'glow') }, 380)
-  })
-
-  await t(400)
-
-  // 9. Pulse
-  spawnPulse($('phonePrimary').querySelector('.phone-inner'))
-  await t(250)
-
-  // 10. Analytics reveal
-  add($('secMask'), 'in')
-
-  // 11. Chart lines — use inline style (overrides any leftover CSS)
-  await t(350)
-  ;['lineEnergy','lineEmotion','lineClarity'].forEach(function(id, idx) {
-    setTimeout(function() {
-      var el = $(id)
-      el.style.transition = 'stroke-dashoffset 1.1s cubic-bezier(0.4,0,0.2,1)'
-      el.style.strokeDashoffset = '0'
-    }, idx * 230)
-  })
-
-  // 12. Label rows
-  await t(450)
-  ;['bRow0','bRow1','bRow2'].forEach(function(id, idx) {
-    setTimeout(function() { add($(id), 'in') }, idx * 190)
-  })
-
-  // 13. Light sweep
-  await t(550)
-  add($('secSweep'), 'in')
-
-  // 14. Result
-  await t(320)
-  add($('primResult'), 'in')
-
-  // 15. Float
-  await t(250)
-  add($('phonePrimary'), 'float')
-  add($('phoneSecondary'), 'float')
-
-  // 16. Hold
-  await t(3000)
-
-  // 17. Fade out
-  add($('fade'), 'in')
-  await t(1300)
-
-  // 18. Loop
-  run()
-}
-
-run()
-
-})(); // end IIFE
 </script>
 </body>
 </html>
