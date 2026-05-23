@@ -249,6 +249,15 @@ export default function JournalScreen({ user, onBack, isPro, onUpgrade }) {
     <div style={{ minHeight: '100vh', paddingTop: '96px', paddingBottom: '120px', position: 'relative', zIndex: 10 }}>
       <div style={{ maxWidth: '580px', margin: '0 auto', padding: '0 clamp(20px, 5vw, 32px)' }}>
 
+        {/* Back */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
+          <button onClick={onBack}
+            style={{ background: 'none', border: 'none', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.8125rem', color: 'var(--flz-text-muted)', cursor: 'pointer', letterSpacing: '0.01em', padding: '0 0 28px', display: 'block', transition: 'color 0.2s' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--flz-text)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--flz-text-muted)'}
+          >← Back</button>
+        </motion.div>
+
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: EASE_CALM, delay: 0.05 }} style={{ paddingBottom: '32px' }}
@@ -370,14 +379,6 @@ export default function JournalScreen({ user, onBack, isPro, onUpgrade }) {
           </motion.div>
         )}
 
-        {/* Back */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.5 }} style={{ paddingTop: '48px' }}>
-          <button onClick={onBack}
-            style={{ background: 'none', border: 'none', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.8125rem', color: 'var(--flz-text-muted)', cursor: 'pointer', letterSpacing: '0.01em', padding: 0, transition: 'color 0.2s' }}
-            onMouseEnter={e => e.target.style.color = 'var(--flz-text)'}
-            onMouseLeave={e => e.target.style.color = 'var(--flz-text-muted)'}
-          >← Back</button>
-        </motion.div>
       </div>
 
       {/* + FAB */}

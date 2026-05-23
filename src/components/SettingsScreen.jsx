@@ -9,7 +9,7 @@ const FOCUS_OPTIONS = [
   'Mindfulness', 'Finances', 'Learning', 'Social',
 ]
 
-export default function SettingsScreen({ user, userName, onSaveName, onBack, focusAreas, onSaveFocusAreas, isPro, onUpgrade }) {
+export default function SettingsScreen({ user, userName, onSaveName, onBack, focusAreas, onSaveFocusAreas, isPro, onUpgrade, onSignOut }) {
   const [name, setName]           = useState(userName || '')
   const [nameFocused, setNameFocused] = useState(false)
   const [nameSaved, setNameSaved] = useState(false)
@@ -78,6 +78,15 @@ export default function SettingsScreen({ user, userName, onSaveName, onBack, foc
   return (
     <div style={{ minHeight: '100vh', paddingTop: '96px', paddingBottom: '80px', position: 'relative', zIndex: 10 }}>
       <div style={{ maxWidth: '480px', margin: '0 auto', padding: '0 clamp(20px, 5vw, 32px)' }}>
+
+        {/* Back */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
+          <button onClick={onBack}
+            style={{ background: 'none', border: 'none', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.8125rem', color: 'var(--flz-text-muted)', cursor: 'pointer', letterSpacing: '0.01em', padding: '0 0 28px', display: 'block', transition: 'color 0.2s' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--flz-text)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--flz-text-muted)'}
+          >← Back</button>
+        </motion.div>
 
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
@@ -240,14 +249,19 @@ export default function SettingsScreen({ user, userName, onSaveName, onBack, foc
           </motion.div>
         )}
 
-        {/* Back */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.4 }} style={{ paddingTop: '48px' }}>
-          <button onClick={onBack}
-            style={{ background: 'none', border: 'none', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.8125rem', color: 'var(--flz-text-muted)', cursor: 'pointer', letterSpacing: '0.01em', padding: 0, transition: 'color 0.2s' }}
-            onMouseEnter={e => e.target.style.color = 'var(--flz-text)'}
-            onMouseLeave={e => e.target.style.color = 'var(--flz-text-muted)'}
-          >← Back</button>
-        </motion.div>
+        {/* Sign out */}
+        {user && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.45 }}
+            style={{ borderTop: '1px solid var(--flz-border)', paddingTop: '32px', paddingBottom: '16px' }}
+          >
+            <button onClick={onSignOut}
+              style={{ background: 'none', border: 'none', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.875rem', color: 'var(--flz-text-muted)', cursor: 'pointer', letterSpacing: '0.01em', padding: 0, transition: 'color 0.2s' }}
+              onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
+              onMouseLeave={e => e.currentTarget.style.color = 'var(--flz-text-muted)'}
+            >Sign out</button>
+          </motion.div>
+        )}
 
       </div>
     </div>

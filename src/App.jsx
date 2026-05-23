@@ -345,7 +345,7 @@ export default function App() {
             <HistoryScreen
               user={user}
               onSelectEntry={handleSelectHistoryEntry}
-              onSignOut={handleSignOut}
+              onBack={() => setScreen('onboarding')}
               isPro={isPro}
               userFocusAreas={focusAreas}
             />
@@ -366,6 +366,7 @@ export default function App() {
               onSaveFocusAreas={setFocusAreas}
               isPro={isPro}
               onUpgrade={handleUpgradeClick}
+              onSignOut={handleSignOut}
             />
           </motion.div>
         )}

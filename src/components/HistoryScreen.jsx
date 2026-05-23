@@ -603,7 +603,7 @@ function EntryRow({ entry, index, onSelect }) {
 
 // ── Main history screen ───────────────────────────────────────────────────────
 
-export default function HistoryScreen({ user, onSelectEntry, onSignOut, isPro, userFocusAreas = [] }) {
+export default function HistoryScreen({ user, onSelectEntry, onBack, isPro, userFocusAreas = [] }) {
   const [entries, setEntries]       = useState([])
   const [loading, setLoading]       = useState(true)
   const [showFilter, setShowFilter] = useState(false)
@@ -641,6 +641,15 @@ export default function HistoryScreen({ user, onSelectEntry, onSignOut, isPro, u
   return (
     <div style={{ minHeight: '100vh', paddingTop: '96px', paddingBottom: '80px', position: 'relative', zIndex: 10 }}>
       <div style={{ maxWidth: '580px', margin: '0 auto', padding: '0 clamp(20px, 5vw, 32px)' }}>
+
+        {/* Back */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
+          <button onClick={onBack}
+            style={{ background: 'none', border: 'none', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.8125rem', color: 'var(--flz-text-muted)', cursor: 'pointer', letterSpacing: '0.01em', padding: '0 0 28px', display: 'block', transition: 'color 0.2s' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--flz-text)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--flz-text-muted)'}
+          >← Back</button>
+        </motion.div>
 
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
@@ -779,12 +788,6 @@ export default function HistoryScreen({ user, onSelectEntry, onSignOut, isPro, u
           </>
         )}
 
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.8 }} style={{ paddingTop: '48px', textAlign: 'center' }}>
-          <button onClick={onSignOut} style={{ background: 'none', border: 'none', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.75rem', color: 'var(--flz-text-muted)', cursor: 'pointer', letterSpacing: '0.01em', padding: '8px 0', transition: 'color 0.2s' }}
-            onMouseEnter={e => e.target.style.color = 'var(--flz-text)'}
-            onMouseLeave={e => e.target.style.color = 'var(--flz-text-muted)'}
-          >Sign out</button>
-        </motion.div>
       </div>
     </div>
   )
