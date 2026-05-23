@@ -123,6 +123,14 @@ export default function OnboardingScreen({ onSubmit, error, userName, onSaveName
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 1.0, ease: 'easeOut', delay: 0.1 }}
             >
+              <p style={{
+                fontFamily: 'Inter, system-ui, sans-serif',
+                fontSize: '0.72rem', letterSpacing: '0.1em',
+                textTransform: 'uppercase', color: 'var(--flz-text-muted)',
+                margin: '0 0 20px', textAlign: 'center',
+              }}>
+                Daily emotional check-ins
+              </p>
               <h1
                 style={{
                   fontFamily: 'Inter, system-ui, sans-serif',
@@ -132,13 +140,21 @@ export default function OnboardingScreen({ onSubmit, error, userName, onSaveName
                   fontWeight: 400,
                   color: 'var(--flz-text)',
                   textAlign: 'center',
-                  margin: '0 0 52px',
+                  margin: '0 0 16px',
                   userSelect: 'none',
                   width: '100%',
                 }}
               >
                 What&apos;s your name?
               </h1>
+              <p style={{
+                fontFamily: 'Inter, system-ui, sans-serif',
+                fontSize: '0.875rem', color: 'var(--flz-text-muted)',
+                textAlign: 'center', lineHeight: 1.65,
+                margin: '0 0 40px', maxWidth: '320px',
+              }}>
+                FLZ reads how you&apos;re feeling and breaks down your energy, emotion, and clarity — so you can understand yourself better over time.
+              </p>
               <div style={{ width: '100%' }}>
                 <OnboardingInput
                   onSubmit={handleSaveName}
