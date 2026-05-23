@@ -54,10 +54,26 @@ export default function App() {
 
   // ── Core flow state ──────────────────────────────────────────────────────
   const [screen, setScreen]         = useState('onboarding')
+  const [navHistory, setNavHistory] = useState([])
   const [resetKey, setResetKey]     = useState(0)
   const [userInput, setUserInput]   = useState('')
   const [analysis, setAnalysis]     = useState(null)
   const [error, setError]           = useState(null)
+
+  // Navigate forward — remembers where we came from
+  function navigate(to) {
+    setNavHistory(prev => [...prev, screenRef.current])
+    setScreen(to)
+  }
+
+  // Go back to the previous screen in the stack
+  function goBack() {
+    if (navHistory.length === 0) { setScreen('onboarding'); return }
+    const prev = [...navHistory]
+    const dest = prev.pop()
+    setNavHistory(prev)
+    setScreen(dest)
+  }
 
   // ── Auth state ───────────────────────────────────────────────────────────
   const [user, setUser]               = useState(null)
@@ -127,6 +143,7 @@ export default function App() {
 
       if (event === 'SIGNED_OUT') {
         setScreen('onboarding')
+        setNavHistory([])
         setResetKey(k => k + 1)
         setSavedEntry(false)
         setIsPro(false)
@@ -183,7 +200,7 @@ export default function App() {
     setUserInput(input)
     setError(null)
     setSavedEntry(false)
-    setScreen('thinking')
+    navigate('thinking')
 
     try {
       const res = await fetch('/api/analyze', {
@@ -195,16 +212,18 @@ export default function App() {
       const data = await res.json()
       setAnalysis(data)
       incrementAssessments()
-      setScreen('results')
+      navigate('results')
     } catch {
       setError('Something went wrong. Please try again.')
       setScreen('onboarding')
+      setNavHistory([])
       setResetKey(k => k + 1)
     }
   }
 
   function handleReset() {
     setScreen('onboarding')
+    setNavHistory([])
     setUserInput('')
     setAnalysis(null)
     setError(null)
@@ -216,19 +235,19 @@ export default function App() {
   function handleUpgradeClick() {
     if (!user) {
       pendingUpgradeRef.current = true
-      setScreen('auth')
+      navigate('auth')
     } else {
-      setScreen('upgrade')
+      navigate('upgrade')
     }
   }
 
   function handleSavePrompt() {
     setPendingEntry({ input: userInput, analysis })
-    setScreen('auth')
+    navigate('auth')
   }
 
   function handleSignInClick() {
-    setScreen('auth')
+    navigate('auth')
   }
 
   const [viewingHistorical, setViewingHistorical] = useState(false)
@@ -238,12 +257,12 @@ export default function App() {
     setAnalysis(entry.analysis)
     setSavedEntry(true)
     setViewingHistorical(true)
-    setScreen('results')
+    navigate('results')
   }
 
   function handleBackToHistory() {
     setViewingHistorical(false)
-    setScreen('history')
+    goBack()
   }
 
   async function handleSignOut() {
@@ -273,9 +292,9 @@ export default function App() {
       <ProfileIcon
         user={user}
         onSignIn={handleSignInClick}
-        onHistory={() => setScreen('history')}
-        onJournal={() => setScreen('journal')}
-        onSettings={() => setScreen('settings')}
+        onHistory={() => navigate('history')}
+        onJournal={() => navigate('journal')}
+        onSettings={() => navigate('settings')}
         onSignOut={handleSignOut}
         onUpgrade={handleUpgradeClick}
         isPro={isPro}
@@ -333,7 +352,7 @@ export default function App() {
             initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 24 }}
             transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }} style={{ position: 'fixed', inset: 0 }}
           >
-            <AuthScreen onBack={() => setScreen(analysis ? 'results' : 'onboarding')} />
+            <AuthScreen onBack={goBack} />
           </motion.div>
         )}
 
@@ -345,7 +364,7 @@ export default function App() {
             <HistoryScreen
               user={user}
               onSelectEntry={handleSelectHistoryEntry}
-              onBack={() => setScreen('onboarding')}
+              onBack={goBack}
               isPro={isPro}
               userFocusAreas={focusAreas}
             />
@@ -361,7 +380,7 @@ export default function App() {
               user={user}
               userName={userName}
               onSaveName={handleSaveName}
-              onBack={() => setScreen(user ? 'history' : 'onboarding')}
+              onBack={goBack}
               focusAreas={focusAreas}
               onSaveFocusAreas={setFocusAreas}
               isPro={isPro}
@@ -378,7 +397,7 @@ export default function App() {
           >
             <JournalScreen
               user={user}
-              onBack={() => setScreen(user ? 'history' : 'onboarding')}
+              onBack={goBack}
               isPro={isPro}
               onUpgrade={handleUpgradeClick}
             />
@@ -392,7 +411,7 @@ export default function App() {
           >
             <UpgradeScreen
               user={user}
-              onBack={() => setScreen(analysis ? 'results' : 'onboarding')}
+              onBack={goBack}
             />
           </motion.div>
         )}
