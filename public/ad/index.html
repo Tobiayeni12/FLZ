@@ -2,456 +2,634 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FLZ — Ad</title>
+  <title>FLZ — Motion Ad</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,200;0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
+    html, body {
+      width: 100%; height: 100%;
       background: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
       font-family: 'Inter', system-ui, sans-serif;
     }
 
-    /* ── Ad frame ─────────────────────────────────────────────────────── */
-    .ad {
-      width: min(600px, 100vmin);
-      height: min(600px, 100vmin);
+    /* ── Stage: fixed 1280×720, scaled to fit ─── */
+    #stage {
+      width: 1280px;
+      height: 720px;
       background: #080808;
-      position: relative;
+      position: absolute;
+      top: 0; left: 0;
       overflow: hidden;
-      flex-shrink: 0;
+      transform-origin: top left;
     }
 
-    /* ── Polka dot background ─────────────────────────────────────────── */
-    .dots {
+    /* ── Grain overlay ─────────────────────────── */
+    #stage::before {
+      content: '';
       position: absolute;
-      inset: 0;
-      background-image: radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px);
-      background-size: 26px 26px;
-      opacity: 0;
-      transition: opacity 1.2s ease;
+      inset: -50%;
+      width: 200%; height: 200%;
+      opacity: 0.055;
+      pointer-events: none;
+      z-index: 100;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)'/%3E%3C/svg%3E");
+      background-size: 300px 300px;
+      animation: grainDrift 1s steps(1) infinite;
     }
-    .dots.visible { opacity: 1; }
+    @keyframes grainDrift {
+      0%   { transform: translate(0,0); }
+      25%  { transform: translate(-3%,-4%); }
+      50%  { transform: translate(4%, 2%); }
+      75%  { transform: translate(-2%, 5%); }
+      100% { transform: translate(0, 0); }
+    }
 
-    /* ── Scenes ───────────────────────────────────────────────────────── */
-    .scene {
+    /* ── Vignette ──────────────────────────────── */
+    #stage::after {
+      content: '';
       position: absolute;
       inset: 0;
+      background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.65) 100%);
+      pointer-events: none;
+      z-index: 99;
+    }
+
+    /* ── Layout panels ─────────────────────────── */
+    .left-panel {
+      position: absolute;
+      left: 0; top: 0;
+      width: 480px; height: 720px;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
-      padding: clamp(32px, 8%, 56px);
-      opacity: 0;
-      pointer-events: none;
+      padding: 0 0 0 96px;
+      z-index: 10;
     }
 
-    /* ── Scene 1: Brand ───────────────────────────────────────────────── */
-    #s1 .logo {
-      font-size: clamp(4rem, 12vmin, 5.5rem);
-      font-weight: 300;
-      letter-spacing: -0.04em;
+    .right-panel {
+      position: absolute;
+      right: 0; top: 0;
+      width: 800px; height: 720px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    /* ── Left: Logo ────────────────────────────── */
+    .logo {
+      font-size: 88px;
+      font-weight: 200;
+      letter-spacing: -0.045em;
       color: #fff;
       line-height: 1;
       opacity: 0;
-      transform: translateY(12px);
-      transition: opacity 0.9s ease, transform 0.9s ease;
+      transform: translateY(18px);
+      filter: blur(6px);
+      transition: opacity 1.1s cubic-bezier(0.16,1,0.3,1),
+                  transform 1.1s cubic-bezier(0.16,1,0.3,1),
+                  filter 1.1s cubic-bezier(0.16,1,0.3,1);
+      will-change: transform, opacity, filter;
     }
-    #s1 .tagline {
-      font-size: clamp(0.65rem, 1.8vmin, 0.78rem);
-      letter-spacing: 0.16em;
+    .logo.in { opacity: 1; transform: translateY(0); filter: blur(0); }
+
+    /* ── Left: Tagline ─────────────────────────── */
+    .tagline {
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.22em;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.38);
-      margin-top: 18px;
+      color: rgba(255,255,255,0.32);
+      margin-top: 20px;
       opacity: 0;
       transform: translateY(8px);
-      transition: opacity 0.8s ease 0.5s, transform 0.8s ease 0.5s;
+      transition: opacity 0.9s ease 0s, transform 0.9s ease 0s;
     }
-    #s1 .logo.in   { opacity: 1; transform: translateY(0); }
-    #s1 .tagline.in { opacity: 1; transform: translateY(0); }
+    .tagline.in { opacity: 1; transform: translateY(0); }
 
-    /* ── Scene 2: Check-in ────────────────────────────────────────────── */
-    #s2 .prompt {
-      font-size: clamp(0.6rem, 1.6vmin, 0.7rem);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.3);
-      margin-bottom: 28px;
-      opacity: 0;
-      transition: opacity 0.6s ease;
+    /* ── Left: Rule line ───────────────────────── */
+    .rule-wrap {
+      margin-top: 32px;
+      width: 260px;
+      height: 1px;
+      overflow: hidden;
     }
-    #s2 .input-wrap {
+    .rule {
       width: 100%;
-      max-width: 380px;
-      border-bottom: 1px solid rgba(255,255,255,0.18);
-      padding-bottom: 12px;
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 12px;
-      opacity: 0;
-      transform: translateY(6px);
-      transition: opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s;
+      height: 100%;
+      background: rgba(255,255,255,0.14);
+      transform-origin: left center;
+      transform: scaleX(0);
+      transition: transform 0.9s cubic-bezier(0.4,0,0.2,1);
     }
-    #s2 .typed-text {
-      font-size: clamp(1rem, 2.8vmin, 1.2rem);
+    .rule.in { transform: scaleX(1); }
+
+    /* ── Left: Description ─────────────────────── */
+    .desc-outer {
+      margin-top: 22px;
+      overflow: hidden;
+      width: 300px;
+    }
+    .desc {
+      font-size: 13.5px;
+      font-weight: 300;
+      line-height: 1.75;
+      color: rgba(255,255,255,0.38);
+      letter-spacing: 0.01em;
+      transform: translateY(100%);
+      transition: transform 0.85s cubic-bezier(0.16,1,0.3,1);
+    }
+    .desc.in { transform: translateY(0); }
+
+    /* ── Phones wrap ───────────────────────────── */
+    .phones-wrap {
+      position: relative;
+      width: 460px;
+      height: 520px;
+    }
+
+    /* Camera push applied here */
+    .phones-push {
+      position: absolute;
+      inset: 0;
+      transform-origin: center bottom;
+      transition: transform 5s cubic-bezier(0.25,0.1,0.25,1);
+    }
+    .phones-push.push { transform: scale(1.07) translateY(-18px); }
+
+    /* ── Phone frame ───────────────────────────── */
+    .phone {
+      position: absolute;
+      width: 210px;
+      height: 424px;
+      background: #101010;
+      border-radius: 40px;
+      border: 1.5px solid rgba(255,255,255,0.13);
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,0.9),
+        0 40px 100px rgba(0,0,0,0.75),
+        0 10px 30px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+      overflow: hidden;
+      will-change: transform, opacity;
+    }
+
+    /* Dynamic island */
+    .phone::before {
+      content: '';
+      position: absolute;
+      top: 13px; left: 50%;
+      transform: translateX(-50%);
+      width: 80px; height: 24px;
+      background: #000;
+      border-radius: 20px;
+      z-index: 20;
+    }
+
+    /* ── Back phone ────────────────────────────── */
+    .phone-back {
+      bottom: 30px;
+      left: 10px;
+      opacity: 0;
+      transform: perspective(1000px) rotateY(-7deg) rotateX(3deg) translateY(30px);
+      transition: opacity 1.2s ease, transform 1.4s cubic-bezier(0.16,1,0.3,1);
+      z-index: 1;
+    }
+    .phone-back.in {
+      opacity: 0.75;
+      transform: perspective(1000px) rotateY(-7deg) rotateX(3deg) translateY(0);
+    }
+
+    /* ── Front phone ───────────────────────────── */
+    .phone-front {
+      bottom: 0;
+      right: 30px;
+      opacity: 0;
+      transform: perspective(1000px) rotateY(-6deg) rotateX(3deg) translateY(60px);
+      transition: opacity 1s ease 0.2s, transform 1.3s cubic-bezier(0.16,1,0.3,1) 0.2s;
+      z-index: 2;
+    }
+    .phone-front.in {
+      opacity: 1;
+      transform: perspective(1000px) rotateY(-6deg) rotateX(3deg) translateY(0);
+    }
+
+    /* ── Phone screen ──────────────────────────── */
+    .screen {
+      position: absolute;
+      inset: 0;
+      background: #080808;
+      padding: 50px 18px 20px;
+      overflow: hidden;
+    }
+
+    /* ── Front screen content ──────────────────── */
+    .s-logo {
+      font-size: 14px;
       font-weight: 300;
       letter-spacing: -0.02em;
-      color: rgba(255,255,255,0.9);
-      line-height: 1.5;
-      min-height: 1.8em;
-      flex: 1;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 36px;
     }
-    #s2 .cursor {
+    .s-question {
+      font-size: 17px;
+      font-weight: 300;
+      letter-spacing: -0.025em;
+      color: #fff;
+      line-height: 1.4;
+      min-height: 48px;
+      margin-bottom: 28px;
+    }
+    .s-cursor {
       display: inline-block;
       width: 1.5px;
-      height: 1.1em;
-      background: rgba(255,255,255,0.7);
+      height: 1em;
+      background: rgba(255,255,255,0.65);
       margin-left: 1px;
       vertical-align: middle;
       animation: blink 0.9s step-end infinite;
     }
-    #s2 .arrow-btn {
-      font-size: 1.1rem;
-      color: rgba(255,255,255,0.5);
-      flex-shrink: 0;
-      opacity: 0;
-      transition: opacity 0.4s ease;
-      line-height: 1;
-      padding-bottom: 2px;
-    }
-    #s2 .prompt.in     { opacity: 1; }
-    #s2 .input-wrap.in { opacity: 1; transform: translateY(0); }
-    #s2 .arrow-btn.in  { opacity: 1; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0; }
-    }
-
-    /* ── Scene 3: Analyzing ───────────────────────────────────────────── */
-    #s3 .dots-loader {
-      display: flex;
-      gap: 7px;
-      align-items: center;
-    }
-    #s3 .dots-loader span {
-      width: 5px; height: 5px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.35);
-      animation: pulse 1.1s ease-in-out infinite;
-    }
-    #s3 .dots-loader span:nth-child(2) { animation-delay: 0.18s; }
-    #s3 .dots-loader span:nth-child(3) { animation-delay: 0.36s; }
-    @keyframes pulse {
-      0%, 80%, 100% { transform: scale(1);   opacity: 0.35; }
-      40%           { transform: scale(1.5); opacity: 0.9; }
-    }
-
-    /* ── Scene 4: Results ─────────────────────────────────────────────── */
-    #s4 .state-label {
-      font-size: clamp(1.4rem, 4vmin, 1.85rem);
-      font-weight: 400;
-      letter-spacing: -0.03em;
-      color: #fff;
-      margin-bottom: 32px;
-      opacity: 0;
-      transform: translateY(10px);
-      transition: opacity 0.7s ease, transform 0.7s ease;
-    }
-    #s4 .dims {
+    .s-input-line {
       width: 100%;
-      max-width: 340px;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
+      height: 1px;
+      background: rgba(255,255,255,0.12);
+      margin-bottom: 12px;
     }
-    #s4 .dim-row {
+    .s-input-hint {
+      font-size: 11px;
+      color: rgba(255,255,255,0.18);
+      letter-spacing: 0.02em;
+    }
+
+    /* Front screen result (shown after typing) */
+    .s-result {
+      margin-top: 20px;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+    .s-result.in { opacity: 1; }
+    .s-state {
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      color: rgba(255,255,255,0.85);
+      margin-bottom: 10px;
+    }
+    .s-dim {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .s-dim span:first-child {
+      font-size: 9.5px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.28);
+    }
+    .s-dim span:last-child {
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: capitalize;
+    }
+
+    /* ── Back screen content ───────────────────── */
+    .b-header {
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 6px;
+    }
+    .b-sub {
+      font-size: 9.5px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.22);
+      margin-bottom: 18px;
+    }
+    .b-streak {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      color: rgba(255,255,255,0.45);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      padding: 4px 9px;
+      margin-bottom: 18px;
+    }
+    .b-chart {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+    .b-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 13px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-      opacity: 0;
-      transform: translateX(-10px);
-      transition: opacity 0.5s ease, transform 0.5s ease;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
     }
-    #s4 .dim-row:first-child { border-top: 1px solid rgba(255,255,255,0.07); }
-    #s4 .dim-name {
-      font-size: clamp(0.65rem, 1.6vmin, 0.72rem);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.35);
-    }
-    #s4 .dim-val {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    #s4 .dim-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-    #s4 .dim-text {
-      font-size: clamp(0.8rem, 2vmin, 0.875rem);
-      font-weight: 500;
-      letter-spacing: -0.01em;
-      text-transform: capitalize;
-    }
-    #s4 .insight {
-      margin-top: 28px;
-      max-width: 340px;
-      font-size: clamp(0.75rem, 1.9vmin, 0.8125rem);
-      font-style: italic;
-      font-weight: 300;
-      color: rgba(255,255,255,0.42);
-      line-height: 1.7;
-      text-align: center;
-      opacity: 0;
-      transition: opacity 0.7s ease 0.4s;
-    }
-    #s4 .state-label.in { opacity: 1; transform: translateY(0); }
-    #s4 .dim-row.in     { opacity: 1; transform: translateX(0); }
-    #s4 .insight.in     { opacity: 1; }
-
-    /* ── Scene 5: CTA ─────────────────────────────────────────────────── */
-    #s5 .cta-url {
-      font-size: clamp(1.1rem, 3vmin, 1.35rem);
-      font-weight: 400;
-      letter-spacing: -0.02em;
-      color: rgba(255,255,255,0.9);
-      opacity: 0;
-      transform: translateY(8px);
-      transition: opacity 0.8s ease, transform 0.8s ease;
-    }
-    #s5 .cta-sub {
-      margin-top: 12px;
-      font-size: clamp(0.62rem, 1.5vmin, 0.7rem);
-      letter-spacing: 0.12em;
+    .b-row span:first-child {
+      font-size: 9.5px;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       color: rgba(255,255,255,0.25);
-      opacity: 0;
-      transition: opacity 0.8s ease 0.4s;
     }
-    #s5 .cta-url.in { opacity: 1; transform: translateY(0); }
-    #s5 .cta-sub.in { opacity: 1; }
+    .b-row span:last-child {
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: capitalize;
+    }
 
-    /* ── FLZ watermark (always visible) ──────────────────────────────── */
-    .watermark {
+    /* Light sweep on back phone */
+    .sweep {
       position: absolute;
-      top: 22px; left: 26px;
-      font-size: clamp(0.85rem, 2.2vmin, 1rem);
-      font-weight: 400;
-      letter-spacing: -0.02em;
-      color: rgba(255,255,255,0.18);
+      inset: 0;
+      background: linear-gradient(
+        115deg,
+        transparent 25%,
+        rgba(255,255,255,0.055) 50%,
+        transparent 75%
+      );
+      transform: translateX(-160%);
       pointer-events: none;
-      z-index: 10;
+      z-index: 5;
+      transition: transform 1.4s cubic-bezier(0.4,0,0.2,1);
     }
+    .sweep.in { transform: translateX(160%); }
+
+    /* ── Bottom tags ───────────────────────────── */
+    .tags {
+      position: absolute;
+      bottom: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .tag {
+      padding: 7px 18px;
+      border-radius: 24px;
+      border: 1px solid;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      opacity: 0;
+      transform: scale(0.7) translateY(8px);
+      transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .tag.in {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    .tag-energy  { color: #f59e0b; border-color: rgba(245,158,11,0.35); background: rgba(245,158,11,0.06); }
+    .tag-emotion { color: #818cf8; border-color: rgba(129,140,248,0.35); background: rgba(129,140,248,0.06); }
+    .tag-clarity { color: #34d399; border-color: rgba(52,211,153,0.35); background: rgba(52,211,153,0.06); }
+
+    .tag-energy.in  { box-shadow: 0 0 14px rgba(245,158,11,0.2); }
+    .tag-emotion.in { box-shadow: 0 0 14px rgba(129,140,248,0.2); }
+    .tag-clarity.in { box-shadow: 0 0 14px rgba(52,211,153,0.2); }
+
+    /* Tag glow pulse */
+    @keyframes glowPulse {
+      0%,100% { box-shadow: 0 0 10px var(--glow); }
+      50%      { box-shadow: 0 0 22px var(--glow); }
+    }
+    .tag-energy.pulse  { animation: glowPulse 2.4s ease infinite; --glow: rgba(245,158,11,0.3); }
+    .tag-emotion.pulse { animation: glowPulse 2.4s ease 0.3s infinite; --glow: rgba(129,140,248,0.3); }
+    .tag-clarity.pulse { animation: glowPulse 2.4s ease 0.6s infinite; --glow: rgba(52,211,153,0.3); }
+
+    /* ── Fade overlay (for loop transition) ─────── */
+    #fade {
+      position: absolute;
+      inset: 0;
+      background: #000;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 98;
+      transition: opacity 1s ease;
+    }
+    #fade.in { opacity: 1; }
   </style>
 </head>
 <body>
 
-<div class="ad" id="ad">
-  <div class="dots" id="dots"></div>
-  <div class="watermark">FLZ.</div>
+<div id="stage">
 
-  <!-- Scene 1: Brand -->
-  <div class="scene" id="s1">
-    <div class="logo" id="logo">FLZ.</div>
-    <div class="tagline" id="tagline">know yourself better</div>
-  </div>
-
-  <!-- Scene 2: Check-in -->
-  <div class="scene" id="s2">
-    <div class="prompt" id="prompt">How are you feeling?</div>
-    <div class="input-wrap" id="inputWrap">
-      <div class="typed-text" id="typedText"><span class="cursor"></span></div>
-      <div class="arrow-btn" id="arrowBtn">→</div>
+  <!-- Left panel -->
+  <div class="left-panel">
+    <div class="logo"   id="logo">FLZ.</div>
+    <div class="tagline" id="tagline">Know yourself better</div>
+    <div class="rule-wrap"><div class="rule" id="rule"></div></div>
+    <div class="desc-outer">
+      <div class="desc" id="desc">Daily check-ins that decode<br>your energy, emotion, and clarity.</div>
     </div>
   </div>
 
-  <!-- Scene 3: Analyzing -->
-  <div class="scene" id="s3">
-    <div class="dots-loader">
-      <span></span><span></span><span></span>
-    </div>
-  </div>
+  <!-- Right panel -->
+  <div class="right-panel">
+    <div class="phones-wrap">
+      <div class="phones-push" id="phonesPush">
 
-  <!-- Scene 4: Results -->
-  <div class="scene" id="s4">
-    <div class="state-label" id="stateLabel">Restless Mind</div>
-    <div class="dims">
-      <div class="dim-row" id="d0">
-        <span class="dim-name">Energy</span>
-        <div class="dim-val">
-          <div class="dim-dot" style="background:#f59e0b"></div>
-          <span class="dim-text" style="color:#f59e0b">Low</span>
+        <!-- Back phone: history screen -->
+        <div class="phone phone-back" id="phoneBack">
+          <div class="screen">
+            <div class="sweep" id="sweep"></div>
+            <div class="b-header">Your growth history</div>
+            <div class="b-sub">7 moments recorded</div>
+            <div class="b-streak">🔥 7 day streak</div>
+
+            <!-- Mini SVG chart -->
+            <svg class="b-chart" viewBox="0 0 174 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Energy line -->
+              <polyline points="0,36 29,28 58,32 87,18 116,22 145,14 174,10"
+                stroke="#f59e0b" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+              <!-- Emotion line -->
+              <polyline points="0,30 29,34 58,26 87,30 116,18 145,22 174,16"
+                stroke="#818cf8" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+              <!-- Clarity line -->
+              <polyline points="0,40 29,36 58,38 87,28 116,24 145,18 174,14"
+                stroke="#34d399" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+            </svg>
+
+            <div class="b-row"><span>Energy</span><span style="color:#f59e0b">High</span></div>
+            <div class="b-row"><span>Emotion</span><span style="color:#818cf8">Positive</span></div>
+            <div class="b-row"><span>Clarity</span><span style="color:#34d399">Focused</span></div>
+          </div>
         </div>
-      </div>
-      <div class="dim-row" id="d1">
-        <span class="dim-name">Emotion</span>
-        <div class="dim-val">
-          <div class="dim-dot" style="background:#6366f1"></div>
-          <span class="dim-text" style="color:#6366f1">Neutral</span>
+
+        <!-- Front phone: check-in screen -->
+        <div class="phone phone-front" id="phoneFront">
+          <div class="screen">
+            <div class="s-logo">FLZ.</div>
+            <div class="s-question" id="typeTarget"><span class="s-cursor"></span></div>
+            <div class="s-input-line"></div>
+            <div class="s-input-hint">Share what's on your mind</div>
+
+            <div class="s-result" id="sResult">
+              <div class="s-state">Restless Mind</div>
+              <div class="s-dim">
+                <span>Energy</span>
+                <span style="color:#f59e0b">Low</span>
+              </div>
+              <div class="s-dim">
+                <span>Emotion</span>
+                <span style="color:#818cf8">Neutral</span>
+              </div>
+              <div class="s-dim">
+                <span>Clarity</span>
+                <span style="color:#34d399">Confused</span>
+              </div>
+            </div>
+          </div>
         </div>
+
+      </div><!-- /phones-push -->
+
+      <!-- Tags -->
+      <div class="tags">
+        <div class="tag tag-energy"  id="tagE">Energy</div>
+        <div class="tag tag-emotion" id="tagEm">Emotion</div>
+        <div class="tag tag-clarity" id="tagC">Clarity</div>
       </div>
-      <div class="dim-row" id="d2">
-        <span class="dim-name">Clarity</span>
-        <div class="dim-val">
-          <div class="dim-dot" style="background:#10b981"></div>
-          <span class="dim-text" style="color:#10b981">Confused</span>
-        </div>
-      </div>
-    </div>
-    <div class="insight" id="insight">
-      "Your thoughts are racing. Slow down — one thing at a time."
     </div>
   </div>
 
-  <!-- Scene 5: CTA -->
-  <div class="scene" id="s5">
-    <div class="cta-url" id="ctaUrl">feelz.chat</div>
-    <div class="cta-sub" id="ctaSub">free to start · understand yourself</div>
-  </div>
+  <div id="fade"></div>
 </div>
 
 <script>
-  const TYPING_TEXT = "feeling scattered and low on energy today…"
-  const LOOP_DURATION = 11000 // ms total
-
-  function show(el)  { el.style.opacity = '1'; el.style.pointerEvents = 'auto'; }
-  function hide(el)  { el.style.opacity = '0'; el.style.pointerEvents = 'none'; }
-  function add(el, cls)    { el.classList.add(cls); }
-  function remove(el, cls) { el.classList.remove(cls); }
-
-  function typeText(el, text, onDone) {
-    // strip cursor span if present
-    el.innerHTML = '<span class="cursor"></span>'
-    const cursor = el.querySelector('.cursor')
-    let i = 0
-    const interval = setInterval(() => {
-      cursor.insertAdjacentText('beforebegin', text[i])
-      i++
-      if (i >= text.length) {
-        clearInterval(interval)
-        if (onDone) onDone()
-      }
-    }, 48)
-    return interval
+  // ── Fit stage to viewport ──────────────────────────────────────────────
+  function fitStage() {
+    const s  = document.getElementById('stage')
+    const sx = window.innerWidth  / 1280
+    const sy = window.innerHeight / 720
+    const sc = Math.min(sx, sy)
+    s.style.transform    = `scale(${sc})`
+    s.style.marginLeft   = ((window.innerWidth  - 1280 * sc) / 2) + 'px'
+    s.style.marginTop    = ((window.innerHeight - 720  * sc) / 2) + 'px'
   }
+  fitStage()
+  window.addEventListener('resize', fitStage)
 
-  function resetAll() {
-    // Scenes
-    ;['s1','s2','s3','s4','s5'].forEach(id => hide(document.getElementById(id)))
-    // Scene 1
-    remove(document.getElementById('logo'), 'in')
-    remove(document.getElementById('tagline'), 'in')
-    // Scene 2
-    remove(document.getElementById('prompt'), 'in')
-    remove(document.getElementById('inputWrap'), 'in')
-    remove(document.getElementById('arrowBtn'), 'in')
-    document.getElementById('typedText').innerHTML = '<span class="cursor"></span>'
-    // Scene 4
-    remove(document.getElementById('stateLabel'), 'in')
-    remove(document.getElementById('d0'), 'in')
-    remove(document.getElementById('d1'), 'in')
-    remove(document.getElementById('d2'), 'in')
-    remove(document.getElementById('insight'), 'in')
-    // Scene 5
-    remove(document.getElementById('ctaUrl'), 'in')
-    remove(document.getElementById('ctaSub'), 'in')
-  }
+  // ── Helpers ────────────────────────────────────────────────────────────
+  const $ = id => document.getElementById(id)
+  const t  = ms => new Promise(r => setTimeout(r, ms))
+  const add    = (el, cls) => el.classList.add(cls)
+  const remove = (el, cls) => el.classList.remove(cls)
 
-  function t(ms) {
-    return new Promise(r => setTimeout(r, ms))
-  }
-
-  async function runLoop() {
-    resetAll()
-
-    // Dots background
-    document.getElementById('dots').classList.add('visible')
-
-    // ── Scene 1: Brand ───────────────────────────
-    await t(300)
-    show(document.getElementById('s1'))
-    await t(50)
-    add(document.getElementById('logo'), 'in')
-    await t(500)
-    add(document.getElementById('tagline'), 'in')
-    await t(1800)
-
-    // Fade out scene 1
-    hide(document.getElementById('s1'))
-    await t(600)
-
-    // ── Scene 2: Check-in ────────────────────────
-    show(document.getElementById('s2'))
-    await t(50)
-    add(document.getElementById('prompt'), 'in')
-    await t(300)
-    add(document.getElementById('inputWrap'), 'in')
-    await t(500)
-
-    // Type
-    await new Promise(resolve => {
-      typeText(document.getElementById('typedText'), TYPING_TEXT, resolve)
+  // Typewriter
+  function typeText(el, text, charDelay = 52) {
+    return new Promise(resolve => {
+      el.innerHTML = '<span class="s-cursor"></span>'
+      const cursor = el.querySelector('.s-cursor')
+      let i = 0
+      const iv = setInterval(() => {
+        cursor.insertAdjacentText('beforebegin', text[i++])
+        if (i >= text.length) { clearInterval(iv); resolve() }
+      }, charDelay)
     })
+  }
 
+  // ── Reset all elements ─────────────────────────────────────────────────
+  function resetAll() {
+    ;['logo','tagline','rule','desc','phoneBack','phoneFront',
+      'sResult','tagE','tagEm','tagC','fade'].forEach(id => {
+      const el = $(id)
+      if (el) remove(el, 'in')
+    })
+    remove($('sweep'), 'in')
+    remove($('phonesPush'), 'push')
+    $('tagE').classList.remove('pulse')
+    $('tagEm').classList.remove('pulse')
+    $('tagC').classList.remove('pulse')
+    $('typeTarget').innerHTML = '<span class="s-cursor"></span>'
+  }
+
+  // ── Main animation loop ────────────────────────────────────────────────
+  async function run() {
+    resetAll()
     await t(400)
-    add(document.getElementById('arrowBtn'), 'in')
-    await t(800)
 
-    hide(document.getElementById('s2'))
-    await t(400)
-
-    // ── Scene 3: Analyzing ───────────────────────
-    show(document.getElementById('s3'))
-    await t(1100)
-    hide(document.getElementById('s3'))
-    await t(300)
-
-    // ── Scene 4: Results ─────────────────────────
-    show(document.getElementById('s4'))
-    await t(50)
-    add(document.getElementById('stateLabel'), 'in')
-    await t(300)
-    add(document.getElementById('d0'), 'in')
-    await t(180)
-    add(document.getElementById('d1'), 'in')
-    await t(180)
-    add(document.getElementById('d2'), 'in')
-    await t(600)
-    add(document.getElementById('insight'), 'in')
-    await t(2200)
-
-    hide(document.getElementById('s4'))
-    await t(500)
-
-    // ── Scene 5: CTA ─────────────────────────────
-    show(document.getElementById('s5'))
-    await t(50)
-    add(document.getElementById('ctaUrl'), 'in')
-    await t(400)
-    add(document.getElementById('ctaSub'), 'in')
-    await t(1800)
-
-    hide(document.getElementById('s5'))
+    // ── Logo ──────────────────────────────────────────────────────────────
+    add($('logo'), 'in')
     await t(700)
 
-    // Loop
-    runLoop()
+    // ── Tagline ───────────────────────────────────────────────────────────
+    $('tagline').style.transition = 'opacity 0.9s ease, transform 0.9s ease'
+    add($('tagline'), 'in')
+    await t(600)
+
+    // ── Rule line ─────────────────────────────────────────────────────────
+    add($('rule'), 'in')
+    await t(400)
+
+    // ── Description text ──────────────────────────────────────────────────
+    add($('desc'), 'in')
+    await t(800)
+
+    // ── Back phone ────────────────────────────────────────────────────────
+    add($('phoneBack'), 'in')
+    await t(350)
+
+    // ── Front phone ───────────────────────────────────────────────────────
+    add($('phoneFront'), 'in')
+    await t(700)
+
+    // ── Typewriter ────────────────────────────────────────────────────────
+    await typeText($('typeTarget'), "What's on your mind, Tobi?", 58)
+    await t(500)
+
+    // ── Light sweep on back phone ─────────────────────────────────────────
+    add($('sweep'), 'in')
+    await t(400)
+
+    // ── Show result on front phone ────────────────────────────────────────
+    add($('sResult'), 'in')
+    await t(400)
+
+    // ── Energy tag ────────────────────────────────────────────────────────
+    add($('tagE'), 'in')
+    await t(220)
+
+    // ── Emotion tag ───────────────────────────────────────────────────────
+    add($('tagEm'), 'in')
+    await t(220)
+
+    // ── Clarity tag ───────────────────────────────────────────────────────
+    add($('tagC'), 'in')
+    await t(600)
+
+    // ── Glow pulse on tags ────────────────────────────────────────────────
+    $('tagE').classList.add('pulse')
+    $('tagEm').classList.add('pulse')
+    $('tagC').classList.add('pulse')
+
+    // ── Camera push (slow, cinematic) ─────────────────────────────────────
+    add($('phonesPush'), 'push')
+
+    await t(3800)
+
+    // ── Fade out ──────────────────────────────────────────────────────────
+    add($('fade'), 'in')
+    await t(1100)
+
+    // ── Loop ──────────────────────────────────────────────────────────────
+    run()
   }
 
-  runLoop()
+  run()
 </script>
 </body>
 </html>
