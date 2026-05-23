@@ -684,11 +684,17 @@ export default function HistoryScreen({ user, onSelectEntry, onSignOut, isPro, u
         {loading ? (
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 0.4 }} style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.875rem', color: 'var(--flz-text)' }}>Loading…</motion.p>
         ) : entries.length === 0 ? (
-          <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: EASE_CALM, delay: 0.3 }}
-            style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.9rem', color: 'var(--flz-text-muted)', lineHeight: 1.7, borderTop: '1px solid var(--flz-border-soft)', paddingTop: '24px' }}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: EASE_CALM, delay: 0.3 }}
+            style={{ borderTop: '1px solid var(--flz-border-soft)', paddingTop: '32px' }}
           >
-            Start by telling FLZ what's on your mind.<br />Your entries will appear here.
-          </motion.p>
+            <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '1rem', fontWeight: 400, color: 'var(--flz-text)', letterSpacing: '-0.01em', margin: '0 0 8px' }}>
+              Nothing here yet.
+            </p>
+            <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.875rem', color: 'var(--flz-text-muted)', lineHeight: 1.7, margin: '0 0 24px' }}>
+              Share what's on your mind on the home screen. Your reflections will build up here over time.
+            </p>
+          </motion.div>
         ) : (
           <>
             {/* Focus area chips */}

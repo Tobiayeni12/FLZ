@@ -15,18 +15,18 @@ const PATH_META = [
 
 const DIM_COLORS = {
   // energy
-  high:      { bg: 'rgba(34,197,94,0.08)',  border: 'rgba(34,197,94,0.25)',  text: '#15803d' },
-  medium:    { bg: 'rgba(234,179,8,0.08)',  border: 'rgba(234,179,8,0.25)',  text: '#a16207' },
-  low:       { bg: 'rgba(99,102,241,0.08)', border: 'rgba(99,102,241,0.25)', text: '#4338ca' },
+  high:       { bg: 'rgba(34,197,94,0.10)',  border: 'rgba(34,197,94,0.28)',  text: '#16a34a' },
+  medium:     { bg: 'rgba(234,179,8,0.10)',  border: 'rgba(234,179,8,0.28)',  text: '#b45309' },
+  low:        { bg: 'rgba(99,102,241,0.10)', border: 'rgba(99,102,241,0.28)', text: '#4f46e5' },
   // emotion
-  positive:  { bg: 'rgba(34,197,94,0.08)',  border: 'rgba(34,197,94,0.25)',  text: '#15803d' },
-  negative:  { bg: 'rgba(239,68,68,0.08)',  border: 'rgba(239,68,68,0.25)',  text: '#b91c1c' },
-  neutral:   { bg: 'rgba(0,0,0,0.04)',      border: 'rgba(0,0,0,0.1)',        text: '#555' },
-  mixed:     { bg: 'rgba(234,179,8,0.08)',  border: 'rgba(234,179,8,0.25)',  text: '#a16207' },
+  positive:   { bg: 'rgba(34,197,94,0.10)',  border: 'rgba(34,197,94,0.28)',  text: '#16a34a' },
+  negative:   { bg: 'rgba(239,68,68,0.10)',  border: 'rgba(239,68,68,0.28)',  text: '#dc2626' },
+  neutral:    { bg: 'var(--flz-tag-bg)',     border: 'var(--flz-tag-border)', text: 'var(--flz-text-muted)' },
+  mixed:      { bg: 'rgba(234,179,8,0.10)',  border: 'rgba(234,179,8,0.28)',  text: '#b45309' },
   // clarity
-  focused:   { bg: 'rgba(34,197,94,0.08)',  border: 'rgba(34,197,94,0.25)',  text: '#15803d' },
-  reflective:{ bg: 'rgba(99,102,241,0.08)', border: 'rgba(99,102,241,0.25)', text: '#4338ca' },
-  confused:  { bg: 'rgba(239,68,68,0.08)',  border: 'rgba(239,68,68,0.25)',  text: '#b91c1c' },
+  focused:    { bg: 'rgba(34,197,94,0.10)',  border: 'rgba(34,197,94,0.28)',  text: '#16a34a' },
+  reflective: { bg: 'rgba(99,102,241,0.10)', border: 'rgba(99,102,241,0.28)', text: '#4f46e5' },
+  confused:   { bg: 'rgba(239,68,68,0.10)',  border: 'rgba(239,68,68,0.28)',  text: '#dc2626' },
 }
 
 function DimensionChip({ label, value }) {

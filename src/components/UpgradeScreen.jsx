@@ -85,10 +85,27 @@ export default function UpgradeScreen({ user, onBack, onCheckout }) {
         <p style={{
           fontFamily: 'Inter, system-ui, sans-serif',
           fontSize: '0.875rem', color: 'var(--flz-text-muted)',
-          lineHeight: 1.6, margin: '0 0 36px', textAlign: 'center',
+          lineHeight: 1.6, margin: '0 0 28px', textAlign: 'center',
         }}>
-          Unlimited assessments, unlimited journal entries,<br />and everything we build next.
+          Everything you need to grow with intention.
         </p>
+
+        {/* Feature list */}
+        <div style={{ width: '100%', marginBottom: '32px', display: 'flex', flexDirection: 'column', gap: '11px' }}>
+          {[
+            'Unlimited daily assessments',
+            'Unlimited journal entries',
+            'Weekly AI reflection summary',
+            'Monthly growth deep dive',
+            'Custom growth focus areas',
+            'Extended dimension trend history',
+          ].map(f => (
+            <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ color: 'var(--flz-text)', fontSize: '0.8rem', flexShrink: 0, lineHeight: 1 }}>✓</span>
+              <span style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.875rem', color: 'var(--flz-text)', lineHeight: 1.4 }}>{f}</span>
+            </div>
+          ))}
+        </div>
 
         {/* Plan cards */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', marginBottom: '24px' }}>

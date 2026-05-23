@@ -349,11 +349,13 @@ export default function JournalScreen({ user, onBack, isPro, onUpgrade }) {
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 0.4 }} style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.875rem', color: 'var(--flz-text)' }}>Loading…</motion.p>
         ) : entries.length === 0 ? (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: EASE_CALM, delay: 0.2 }}
-            style={{ borderTop: '1px solid var(--flz-border-soft)', paddingTop: '28px' }}
+            style={{ borderTop: '1px solid var(--flz-border-soft)', paddingTop: '32px' }}
           >
-            <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.9rem', color: 'var(--flz-text-muted)', lineHeight: 1.8, margin: 0 }}>
-              Your journal is empty.<br />
-              Answer a question from any reflection, or tap <strong style={{ fontWeight: 500, color: 'var(--flz-text)' }}>+</strong> to write a manual entry.
+            <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '1rem', fontWeight: 400, color: 'var(--flz-text)', letterSpacing: '-0.01em', margin: '0 0 8px' }}>
+              Your journal is empty.
+            </p>
+            <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.875rem', color: 'var(--flz-text-muted)', lineHeight: 1.7, margin: 0 }}>
+              After a reflection, answer one of the questions to save it here. Or tap <strong style={{ fontWeight: 500, color: 'var(--flz-text)' }}>+</strong> to write freely.
             </p>
           </motion.div>
         ) : visibleEntries.length === 0 ? (
