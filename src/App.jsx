@@ -24,12 +24,15 @@ export default function App() {
     localStorage.setItem('flz-dark', dark)
   }, [dark])
 
-  // ── User name ─────────────────────────────────────────────────────────────
-  const [userName, setUserName] = useState(() => localStorage.getItem('flz-name') || '')
+  // ── User name — session only for guests, saved to Supabase for logged-in ─
+  const [userName, setUserName] = useState('')
 
-  function handleSaveName(name) {
-    localStorage.setItem('flz-name', name)
+  async function handleSaveName(name) {
     setUserName(name)
+    if (user) {
+      await supabase.from('profiles')
+        .upsert({ id: user.id, display_name: name, updated_at: new Date().toISOString() })
+    }
   }
 
   // ── Plan config ──────────────────────────────────────────────────────────
@@ -81,11 +84,12 @@ export default function App() {
 
   // ── Fetch Pro status + focus areas from Supabase whenever user changes ──
   useEffect(() => {
-    if (!user) { setIsPro(false); setFocusAreas([]); return }
-    supabase.from('profiles').select('is_pro, focus_areas').eq('id', user.id).single()
+    if (!user) { setIsPro(false); setFocusAreas([]); setUserName(''); return }
+    supabase.from('profiles').select('is_pro, focus_areas, display_name').eq('id', user.id).single()
       .then(({ data }) => {
         setIsPro(data?.is_pro ?? false)
         setFocusAreas(data?.focus_areas ?? [])
+        if (data?.display_name) setUserName(data.display_name)
       })
   }, [user])
 
