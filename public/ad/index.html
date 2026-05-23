@@ -490,223 +490,209 @@
 </div>
 
 <script>
-// ── Fit stage to viewport ───────────────────────────────────────────────────
+;(function() {
+
+// ── Fit stage to viewport ────────────────────────────────────────────────────
 function fitStage() {
-  const s  = document.getElementById('stage')
-  const sx = window.innerWidth  / 1080
-  const sy = window.innerHeight / 1920
-  const sc = Math.min(sx, sy)
-  s.style.transform  = `scale(${sc})`
+  var s  = document.getElementById('stage')
+  var sx = window.innerWidth  / 1080
+  var sy = window.innerHeight / 1920
+  var sc = Math.min(sx, sy)
+  s.style.transform  = 'scale(' + sc + ')'
   s.style.marginLeft = ((window.innerWidth  - 1080 * sc) / 2) + 'px'
   s.style.marginTop  = ((window.innerHeight - 1920 * sc) / 2) + 'px'
 }
 fitStage()
 window.addEventListener('resize', fitStage)
 
-// ── Star + grain canvas ─────────────────────────────────────────────────────
-(function buildBackground() {
-  const canvas = document.getElementById('bgCanvas')
+// ── Star + grain canvas ──────────────────────────────────────────────────────
+;(function() {
+  var canvas = document.getElementById('bgCanvas')
   canvas.width = 1080; canvas.height = 1920
-  const ctx = canvas.getContext('2d')
+  var ctx = canvas.getContext('2d')
 
-  // Deep space gradient
-  const grd = ctx.createRadialGradient(540,800,0, 540,800,1100)
+  var grd = ctx.createRadialGradient(540,800,0, 540,800,1100)
   grd.addColorStop(0, 'rgba(16,14,22,1)')
   grd.addColorStop(1, 'rgba(4,4,6,1)')
   ctx.fillStyle = grd
   ctx.fillRect(0,0,1080,1920)
 
-  // Stars — varied sizes & brightness
-  const starData = [
-    { n: 120, rMin: 0.4, rMax: 1.2,  oMin: 0.06, oMax: 0.18 },
-    { n: 60,  rMin: 1.2, rMax: 2.0,  oMin: 0.08, oMax: 0.22 },
-    { n: 12,  rMin: 2.0, rMax: 3.2,  oMin: 0.12, oMax: 0.30 },
+  var starData = [
+    { n:120, rMin:0.4, rMax:1.2, oMin:0.06, oMax:0.18 },
+    { n:60,  rMin:1.2, rMax:2.0, oMin:0.08, oMax:0.22 },
+    { n:12,  rMin:2.0, rMax:3.2, oMin:0.12, oMax:0.30 },
   ]
-  starData.forEach(({n,rMin,rMax,oMin,oMax}) => {
-    for (let i=0; i<n; i++) {
-      const x = Math.random()*1080
-      const y = Math.random()*1920
-      const r = rMin + Math.random()*(rMax-rMin)
-      const o = oMin + Math.random()*(oMax-oMin)
-      // Soft star glow
-      const g2 = ctx.createRadialGradient(x,y,0,x,y,r*3)
-      g2.addColorStop(0, `rgba(220,225,255,${o})`)
+  starData.forEach(function(d) {
+    for (var i=0; i<d.n; i++) {
+      var x = Math.random()*1080, y = Math.random()*1920
+      var r = d.rMin + Math.random()*(d.rMax-d.rMin)
+      var o = d.oMin + Math.random()*(d.oMax-d.oMin)
+      var g2 = ctx.createRadialGradient(x,y,0,x,y,r*3)
+      g2.addColorStop(0, 'rgba(220,225,255,'+o+')')
       g2.addColorStop(1, 'rgba(0,0,0,0)')
-      ctx.beginPath()
-      ctx.arc(x,y,r*3,0,Math.PI*2)
-      ctx.fillStyle = g2
-      ctx.fill()
+      ctx.beginPath(); ctx.arc(x,y,r*3,0,Math.PI*2)
+      ctx.fillStyle = g2; ctx.fill()
     }
   })
 
-  // Grain — subtle noise
-  for (let i=0; i<22000; i++) {
-    const x = Math.random()*1080
-    const y = Math.random()*1920
-    const o = Math.random()*0.038
-    ctx.fillStyle = `rgba(255,255,255,${o})`
+  for (var i=0; i<22000; i++) {
+    var x = Math.random()*1080, y = Math.random()*1920
+    ctx.fillStyle = 'rgba(255,255,255,'+(Math.random()*0.038)+')'
     ctx.fillRect(x,y,1,1)
   }
 })()
 
-// ── Helpers ─────────────────────────────────────────────────────────────────
-const $ = id => document.getElementById(id)
-const t = ms => new Promise(r => setTimeout(r, ms))
-const cl = (el,c) => el.classList
-const add = (el,c) => el.classList.add(c)
-const rem = (el,c) => el.classList.remove(c)
+// ── Helpers (function declarations = hoisted, no TDZ) ────────────────────────
+function $(id) { return document.getElementById(id) }
+function t(ms) { return new Promise(function(r) { setTimeout(r, ms) }) }
+function add(el, c) { el.classList.add(c) }
+function rem(el, c) { el.classList.remove(c) }
 
 // ── Human-rhythm typing ──────────────────────────────────────────────────────
 function humanType(el, text, onWord) {
-  return new Promise(resolve => {
+  return new Promise(function(resolve) {
     el.innerHTML = '<span class="p-cursor"></span>'
-    const cursor = el.querySelector('.p-cursor')
-    let i = 0
-    let prevChar = ''
-
+    var cursor = el.querySelector('.p-cursor')
+    var i = 0, prevChar = ''
     function next() {
       if (i >= text.length) { resolve(); return }
-      const char = text[i]
+      var char = text[i]
       cursor.insertAdjacentText('beforebegin', char)
       i++
-
-      // Trigger word glow on space or last char
       if ((char === ' ' || i === text.length) && onWord) onWord()
-
-      // Human timing
-      let delay = 48 + Math.random() * 52  // base 48–100ms
-      if (prevChar === ' ') delay += 30     // pause after space
-      if (char === ' ')     delay += 20     // pause before new word
-      if (Math.random() < 0.07) delay += 160 // rare thinking pause
-      if (i > 3 && i < text.length - 3) delay -= 8 // faster in middle
-
+      var delay = 48 + Math.random() * 52
+      if (prevChar === ' ') delay += 30
+      if (char === ' ')     delay += 20
+      if (Math.random() < 0.07) delay += 160
+      if (i > 3 && i < text.length - 3) delay -= 8
       prevChar = char
       setTimeout(next, Math.max(28, delay))
     }
-    setTimeout(next, 180) // initial pause before typing
+    setTimeout(next, 180)
   })
 }
 
 // ── Pulse ring ───────────────────────────────────────────────────────────────
 function spawnPulse(container) {
-  const ring = document.createElement('div')
+  var ring = document.createElement('div')
   ring.className = 'pulse-ring'
   container.appendChild(ring)
-  setTimeout(() => ring.remove(), 1400)
+  setTimeout(function() { ring.remove() }, 1400)
 }
 
 // ── Reset ────────────────────────────────────────────────────────────────────
 function resetAll() {
-  ;['logoText','taglineText','phoneSecondary','phonePrimary',
-    'secMask','secSweep','pQuestion','primResult','fade',
-    'lineEnergy','lineEmotion','lineClarity',
-    'bRow0','bRow1','bRow2'].forEach(id => rem($(id),'in'))
+  ['logoText','taglineText','phoneSecondary','phonePrimary',
+   'secMask','secSweep','pQuestion','primResult','fade',
+   'bRow0','bRow1','bRow2'].forEach(function(id) { rem($(id), 'in') })
 
-  rem($('phonePrimary'),'float')
-  rem($('phoneSecondary'),'float')
-  rem($('phonesContainer'),'push')
-  rem($('pInputArea'),'glow')
+  rem($('phonePrimary'), 'float')
+  rem($('phoneSecondary'), 'float')
+  rem($('phonesContainer'), 'push')
+  rem($('pInputArea'), 'glow')
 
   $('pTyped').innerHTML = '<span class="p-cursor"></span>'
 
-  // Reset chart lines
-  ;['lineEnergy','lineEmotion','lineClarity'].forEach(id => {
-    $(id).style.transition = 'none'
-    $(id).style.strokeDashoffset = '260'
+  // Reset chart lines — clear inline styles so CSS defaults take over
+  ;['lineEnergy','lineEmotion','lineClarity'].forEach(function(id) {
+    var el = $(id)
+    el.style.transition = 'none'
+    el.style.strokeDashoffset = '260'
   })
 
-  // Remove any stray pulse rings
-  document.querySelectorAll('.pulse-ring').forEach(e => e.remove())
+  document.querySelectorAll('.pulse-ring').forEach(function(e) { e.remove() })
 }
 
 // ── Animation sequence ───────────────────────────────────────────────────────
 async function run() {
   resetAll()
-  await t(200)
+  await t(300)
 
   // 1. Logo
-  add($('logoText'),'in')
-  await t(650)
+  add($('logoText'), 'in')
+  await t(700)
 
   // 2. Tagline
   $('taglineText').style.transition = 'opacity 1s ease, transform 1s cubic-bezier(0.16,1,0.3,1)'
-  add($('taglineText'),'in')
-  await t(700)
-
-  // 3. Secondary phone rotates in
-  add($('phoneSecondary'),'in')
-  await t(320)
-
-  // 4. Primary phone rotates in
-  add($('phonePrimary'),'in')
-  await t(600)
-
-  // 5. Start slow camera push
-  add($('phonesContainer'),'push')
-
-  // 6. "What's on your mind?" fades in
-  add($('pQuestion'),'in')
+  add($('taglineText'), 'in')
   await t(750)
 
-  // 7. Cursor blinks naturally for a beat (already blinking via CSS)
-  await t(900)
-
-  // 8. Type with human rhythm + word glow
-  await humanType($('pTyped'), 'feeling scattered and low energy today', () => {
-    add($('pInputArea'),'glow')
-    setTimeout(() => rem($('pInputArea'),'glow'), 380)
-  })
-
+  // 3. Secondary phone
+  add($('phoneSecondary'), 'in')
   await t(350)
 
-  // 9. Completion pulse
-  spawnPulse($('phonePrimary').querySelector('.phone-inner'))
-  await t(200)
+  // 4. Primary phone
+  add($('phonePrimary'), 'in')
+  await t(650)
 
-  // 10. Secondary phone mask reveal (analytics screen)
-  add($('secMask'),'in')
+  // 5. Camera push
+  add($('phonesContainer'), 'push')
 
-  // 11. Animate chart lines staggered
-  await t(300)
-  ;['lineEnergy','lineEmotion','lineClarity'].forEach((id,idx) => {
-    setTimeout(() => {
-      const el = $(id)
-      el.style.transition = `stroke-dashoffset 1.05s cubic-bezier(0.4,0,0.2,1)`
-      add(el,'draw')
-    }, idx * 220)
+  // 6. Question
+  add($('pQuestion'), 'in')
+  await t(800)
+
+  // 7. Cursor blink pause
+  await t(900)
+
+  // 8. Typing
+  await humanType($('pTyped'), 'feeling scattered and low energy today', function() {
+    add($('pInputArea'), 'glow')
+    setTimeout(function() { rem($('pInputArea'), 'glow') }, 380)
   })
 
-  // 12. Label rows pop in
   await t(400)
-  ;['bRow0','bRow1','bRow2'].forEach((id,idx) => {
-    setTimeout(() => add($(id),'in'), idx * 180)
+
+  // 9. Pulse
+  spawnPulse($('phonePrimary').querySelector('.phone-inner'))
+  await t(250)
+
+  // 10. Analytics reveal
+  add($('secMask'), 'in')
+
+  // 11. Chart lines — use inline style (overrides any leftover CSS)
+  await t(350)
+  ;['lineEnergy','lineEmotion','lineClarity'].forEach(function(id, idx) {
+    setTimeout(function() {
+      var el = $(id)
+      el.style.transition = 'stroke-dashoffset 1.1s cubic-bezier(0.4,0,0.2,1)'
+      el.style.strokeDashoffset = '0'
+    }, idx * 230)
   })
 
-  // 13. Light sweep on secondary
-  await t(500)
-  add($('secSweep'),'in')
+  // 12. Label rows
+  await t(450)
+  ;['bRow0','bRow1','bRow2'].forEach(function(id, idx) {
+    setTimeout(function() { add($(id), 'in') }, idx * 190)
+  })
 
-  // 14. Show result on primary phone
-  await t(300)
-  add($('primResult'),'in')
+  // 13. Light sweep
+  await t(550)
+  add($('secSweep'), 'in')
 
-  // 15. Start parallax float
-  await t(200)
-  add($('phonePrimary'),'float')
-  add($('phoneSecondary'),'float')
+  // 14. Result
+  await t(320)
+  add($('primResult'), 'in')
 
-  // 16. Hold (premium pacing)
-  await t(2800)
+  // 15. Float
+  await t(250)
+  add($('phonePrimary'), 'float')
+  add($('phoneSecondary'), 'float')
+
+  // 16. Hold
+  await t(3000)
 
   // 17. Fade out
-  add($('fade'),'in')
-  await t(1200)
+  add($('fade'), 'in')
+  await t(1300)
 
   // 18. Loop
   run()
 }
 
 run()
+
+})(); // end IIFE
 </script>
 </body>
 </html>
