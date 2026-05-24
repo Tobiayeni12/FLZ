@@ -1,0 +1,12 @@
+{
+  "appId": "com.flz.app",
+  "appName": "FLZ",
+  "webDir": "dist",
+  "server": {
+    "url": "https://feelz.chat",
+    "cleartext": false
+  },
+  "ios": {
+    "contentInset": "always"
+  }
+}

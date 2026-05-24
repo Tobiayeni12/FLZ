@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
+import { Capacitor } from '@capacitor/core'
+import { Browser } from '@capacitor/browser'
 
 const EASE_CALM = [0.25, 0.46, 0.45, 0.94]
 
@@ -40,10 +42,22 @@ export default function AuthScreen({ onBack }) {
   }
 
   async function handleGoogleSignUp() {
-    await supabase.auth.signInWithOAuth({
+    const isNative = Capacitor.isNativePlatform()
+    const redirectTo = isNative
+      ? 'com.flz.app://auth/callback'
+      : window.location.origin
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin },
+      options: {
+        redirectTo,
+        skipBrowserRedirect: isNative,
+      },
     })
+
+    if (isNative && data?.url) {
+      await Browser.open({ url: data.url })
+    }
   }
 
   const busy = phase === 'loading'

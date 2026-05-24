@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { supabase } from './lib/supabase'
+import { Capacitor } from '@capacitor/core'
+import { Browser } from '@capacitor/browser'
+import { App as CapApp } from '@capacitor/app'
 
 import OnboardingScreen  from './components/OnboardingScreen'
 import ThinkingScreen    from './components/ThinkingScreen'
@@ -155,6 +158,33 @@ export default function App() {
     })
 
     return () => { mounted = false; subscription.unsubscribe() }
+  }, [])
+
+  // ── Deep link handler for native OAuth callback ───────────────────────────
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return
+
+    const handleUrl = async ({ url }) => {
+      if (url?.startsWith('com.flz.app://auth/callback')) {
+        await Browser.close()
+        const urlObj = new URL(url)
+        // Extract tokens from hash or search params
+        const params = new URLSearchParams(
+          urlObj.hash ? urlObj.hash.substring(1) : urlObj.search
+        )
+        const accessToken  = params.get('access_token')
+        const refreshToken = params.get('refresh_token')
+        if (accessToken) {
+          await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+        } else {
+          // PKCE flow — let Supabase exchange the code
+          await supabase.auth.exchangeCodeForSession(urlObj.search)
+        }
+      }
+    }
+
+    CapApp.addListener('appUrlOpen', handleUrl)
+    return () => { CapApp.removeAllListeners() }
   }, [])
 
   // ── Auto-save pending entry after guest signs in ─────────────────────────
