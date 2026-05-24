@@ -617,6 +617,12 @@ function DimensionFilter({ filter, onChange }) {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
+/** Returns 'YYYY-MM-DD' in the user's LOCAL timezone — never UTC */
+function localDateStr(d) {
+  const dt = typeof d === 'string' ? new Date(d) : d
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`
+}
+
 function formatDate(iso) {
   return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(iso))
 }
@@ -673,20 +679,20 @@ export default function HistoryScreen({ user, onSelectEntry, onBack, isPro, user
   const streak = calcStreak(entries)
 
   const filteredEntries = useMemo(() => {
-    const now        = new Date()
-    const todayStr   = now.toISOString().slice(0, 10)
-    const weekAgo    = new Date(Date.now() - 7 * 86400000).toISOString()
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+    const now          = new Date()
+    const todayStr     = localDateStr(now)
+    const weekAgoMs    = Date.now() - 7 * 86400000
+    const monthStart   = new Date(now.getFullYear(), now.getMonth(), 1)  // local midnight
 
     return entries.filter(e => {
       if (filter.energy  && e.energy  !== filter.energy)  return false
       if (filter.emotion && e.emotion !== filter.emotion) return false
       if (filter.clarity && e.clarity !== filter.clarity) return false
       if (focusFilter && !(Array.isArray(e.focus_areas) && e.focus_areas.includes(focusFilter))) return false
-      if (dateFilter === 'today' && e.created_at.slice(0, 10) !== todayStr) return false
-      if (dateFilter === 'week'  && e.created_at < weekAgo) return false
-      if (dateFilter === 'month' && e.created_at < monthStart) return false
-      if (dateFilter && dateFilter.length === 10 && e.created_at.slice(0, 10) !== dateFilter) return false
+      if (dateFilter === 'today' && localDateStr(new Date(e.created_at)) !== todayStr) return false
+      if (dateFilter === 'week'  && new Date(e.created_at).getTime() < weekAgoMs) return false
+      if (dateFilter === 'month' && new Date(e.created_at) < monthStart) return false
+      if (dateFilter && dateFilter.length === 10 && localDateStr(new Date(e.created_at)) !== dateFilter) return false
       return true
     })
   }, [entries, filter, focusFilter, dateFilter])
