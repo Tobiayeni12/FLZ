@@ -174,14 +174,12 @@ body{background:#000;width:100vw;height:100vh;overflow:hidden;display:flex;align
 .bvd{left:-3px;top:240px;width:3px;height:62px}
 .bpw{right:-3px;top:192px;width:3px;height:82px}
 
-#scVid,#scImg{
+#scVid{
   position:absolute;inset:0;
   width:100%;height:100%;
   object-fit:cover;object-position:top center;
+  z-index:1;
 }
-#scVid{z-index:1;opacity:1}
-#scImg{z-index:2;opacity:0;transition:opacity 1s ease}
-#scImg.on{opacity:1}
 
 .stop{
   position:absolute;top:0;left:0;right:0;height:56px;
@@ -229,7 +227,6 @@ body{background:#000;width:100vw;height:100vh;overflow:hidden;display:flex;align
         <div class="notch"><div class="ncam"></div></div>
         <div class="stop"></div>
         <video id="scVid" autoplay muted playsinline loop src="app-recording.mp4"></video>
-        <img id="scImg" src="screen4.png" alt="">
         <div class="sref"></div>
         <div class="hbar"></div>
       </div>
@@ -375,7 +372,6 @@ function resetAll(){
   pw.style.transform='translate(-50%,-50%) translateY(220px) scale(0.9)'
 
   $('iBody').className='iphone'
-  $('scImg').className=''
 
   $('t1').style.cssText='opacity:0;transition:none'
   $('t2').style.cssText='opacity:0;transition:none'
@@ -427,10 +423,9 @@ async function run(){
   geoDraw('gVL',  600,500)
   geoDraw('gVR',  600,500)
 
-  /* 4.1s ── phone glows green + analysis screen */
+  /* 4.1s ── phone glows green */
   await sleep(650)
   $('iBody').classList.add('glow')
-  $('scImg').classList.add('on')
 
   /* 4.4s ── clarity badge rises */
   await sleep(260)
