@@ -24,7 +24,7 @@ function calcStreak(entries) {
 
 // ── Calendar view ─────────────────────────────────────────────────────────────
 
-function CalendarView({ entries }) {
+function CalendarView({ entries, selectedDate, onDateSelect }) {
   const [viewDate, setViewDate] = useState(new Date())
   const year  = viewDate.getFullYear()
   const month = viewDate.getMonth()
@@ -42,9 +42,18 @@ function CalendarView({ entries }) {
   const todayDay       = isCurrentMonth ? todayDate.getDate() : -1
   const monthLabel     = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(viewDate)
 
+  // selected day within this month
+  const selectedDay = selectedDate && selectedDate.length === 10
+    ? (() => { const d = new Date(selectedDate + 'T12:00:00'); return d.getFullYear() === year && d.getMonth() === month ? d.getDate() : -1 })()
+    : -1
+
   const cells = []
   for (let i = 0; i < firstDayOfWeek; i++) cells.push(null)
   for (let d = 1; d <= daysInMonth; d++) cells.push(d)
+
+  function isoForDay(d) {
+    return `${year}-${String(month + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+  }
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
@@ -70,15 +79,55 @@ function CalendarView({ entries }) {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '3px' }}>
         {cells.map((day, i) => {
-          const hasEntry = day && entryDates.has(day)
-          const isToday  = day === todayDay
+          const hasEntry  = day && entryDates.has(day)
+          const isToday   = day === todayDay
+          const isSelected = day === selectedDay
+          const clickable = hasEntry && onDateSelect
+          const iso = day ? isoForDay(day) : null
           return (
-            <div key={i} style={{ height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', background: hasEntry ? 'var(--flz-text)' : isToday ? 'var(--flz-tag-bg)' : 'transparent', border: isToday && !hasEntry ? '1px solid var(--flz-border-input)' : '1px solid transparent' }}>
-              {day && <span style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.75rem', color: hasEntry ? 'var(--flz-bg)' : 'var(--flz-text-dim)', fontWeight: hasEntry ? 500 : 400, lineHeight: 1 }}>{day}</span>}
+            <div key={i}
+              onClick={() => clickable && onDateSelect(isSelected ? null : iso)}
+              style={{
+                height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                borderRadius: '4px', cursor: clickable ? 'pointer' : 'default',
+                background: isSelected
+                  ? 'var(--flz-text)'
+                  : hasEntry
+                    ? 'var(--flz-tag-bg)'
+                    : isToday ? 'var(--flz-tag-bg)' : 'transparent',
+                border: isSelected
+                  ? '1px solid var(--flz-text)'
+                  : isToday && !hasEntry
+                    ? '1px solid var(--flz-border-input)'
+                    : hasEntry
+                      ? '1px solid var(--flz-border)'
+                      : '1px solid transparent',
+                transition: 'all 0.15s',
+              }}
+            >
+              {day && (
+                <span style={{
+                  fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.75rem', lineHeight: 1,
+                  color: isSelected ? 'var(--flz-bg)' : hasEntry ? 'var(--flz-text)' : 'var(--flz-text-dim)',
+                  fontWeight: hasEntry || isSelected ? 500 : 400,
+                }}>{day}</span>
+              )}
             </div>
           )
         })}
       </div>
+      {selectedDay > 0 && (
+        <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--flz-border-soft)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.72rem', color: 'var(--flz-text-muted)' }}>
+            Showing {new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric' }).format(new Date(selectedDate + 'T12:00:00'))}
+          </span>
+          <button onClick={() => onDateSelect(null)}
+            style={{ background: 'none', border: 'none', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.72rem', color: 'var(--flz-text-muted)', cursor: 'pointer', padding: 0 }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--flz-text)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--flz-text-muted)'}
+          >Show all</button>
+        </div>
+      )}
     </motion.div>
   )
 }
@@ -604,11 +653,12 @@ function EntryRow({ entry, index, onSelect }) {
 // ── Main history screen ───────────────────────────────────────────────────────
 
 export default function HistoryScreen({ user, onSelectEntry, onBack, isPro, userFocusAreas = [] }) {
-  const [entries, setEntries]       = useState([])
-  const [loading, setLoading]       = useState(true)
-  const [showFilter, setShowFilter] = useState(false)
-  const [filter, setFilter]         = useState({ energy: null, emotion: null, clarity: null })
-  const [focusFilter, setFocusFilter] = useState(null) // active focus area filter
+  const [entries, setEntries]         = useState([])
+  const [loading, setLoading]         = useState(true)
+  const [showFilter, setShowFilter]   = useState(false)
+  const [filter, setFilter]           = useState({ energy: null, emotion: null, clarity: null })
+  const [focusFilter, setFocusFilter] = useState(null)
+  const [dateFilter, setDateFilter]   = useState(null) // null='all' | 'today' | 'week' | 'month' | 'YYYY-MM-DD'
 
   useEffect(() => {
     async function load() {
@@ -623,20 +673,30 @@ export default function HistoryScreen({ user, onSelectEntry, onBack, isPro, user
   const streak = calcStreak(entries)
 
   const filteredEntries = useMemo(() => {
-    return entries.filter(e =>
-      (!filter.energy   || e.energy  === filter.energy)  &&
-      (!filter.emotion  || e.emotion === filter.emotion) &&
-      (!filter.clarity  || e.clarity === filter.clarity) &&
-      (!focusFilter     || (Array.isArray(e.focus_areas) && e.focus_areas.includes(focusFilter)))
-    )
-  }, [entries, filter, focusFilter])
+    const now        = new Date()
+    const todayStr   = now.toISOString().slice(0, 10)
+    const weekAgo    = new Date(Date.now() - 7 * 86400000).toISOString()
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+
+    return entries.filter(e => {
+      if (filter.energy  && e.energy  !== filter.energy)  return false
+      if (filter.emotion && e.emotion !== filter.emotion) return false
+      if (filter.clarity && e.clarity !== filter.clarity) return false
+      if (focusFilter && !(Array.isArray(e.focus_areas) && e.focus_areas.includes(focusFilter))) return false
+      if (dateFilter === 'today' && e.created_at.slice(0, 10) !== todayStr) return false
+      if (dateFilter === 'week'  && e.created_at < weekAgo) return false
+      if (dateFilter === 'month' && e.created_at < monthStart) return false
+      if (dateFilter && dateFilter.length === 10 && e.created_at.slice(0, 10) !== dateFilter) return false
+      return true
+    })
+  }, [entries, filter, focusFilter, dateFilter])
 
   const focusFilteredEntries = useMemo(() => {
     if (!focusFilter) return []
     return entries.filter(e => Array.isArray(e.focus_areas) && e.focus_areas.includes(focusFilter))
   }, [entries, focusFilter])
 
-  const hasFilter = Object.values(filter).some(Boolean) || !!focusFilter
+  const hasFilter = Object.values(filter).some(Boolean) || !!focusFilter || !!dateFilter
 
   return (
     <div style={{ minHeight: '100vh', paddingTop: '96px', paddingBottom: '80px', position: 'relative', zIndex: 10 }}>
@@ -751,14 +811,18 @@ export default function HistoryScreen({ user, onSelectEntry, onBack, isPro, user
                     style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.72rem', padding: '3px 10px', borderRadius: '20px', background: 'var(--flz-text)', color: 'var(--flz-bg)', border: 'none', cursor: 'pointer' }}
                   >{k}: {v} ×</button>
                 ))}
-                <button onClick={() => { setFilter({ energy: null, emotion: null, clarity: null }); setFocusFilter(null) }}
+                <button onClick={() => { setFilter({ energy: null, emotion: null, clarity: null }); setFocusFilter(null); setDateFilter(null) }}
                   style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.72rem', color: 'var(--flz-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: '3px 4px' }}
                 >Clear all</button>
               </motion.div>
             )}
 
             {/* Calendar */}
-            <CalendarView entries={entries} />
+            <CalendarView
+              entries={entries}
+              selectedDate={dateFilter && dateFilter.length === 10 ? dateFilter : null}
+              onDateSelect={setDateFilter}
+            />
 
             {/* Dimension chart */}
             {entries.length >= 2 && <DimensionChart entries={entries} isPro={isPro} />}
@@ -778,10 +842,63 @@ export default function HistoryScreen({ user, onSelectEntry, onBack, isPro, user
             {/* Pattern insight — 3+ entries */}
             {entries.length >= 3 && <PatternSummary entries={entries} />}
 
-            {/* Entry list */}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay: 0.2 }} style={{ borderTop: '1px solid var(--flz-border-soft)' }}>
+            {/* Date filter pills + entry list */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay: 0.2 }}>
+
+              {/* Pills row */}
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px', alignItems: 'center' }}>
+                {[
+                  { label: 'All',        val: null    },
+                  { label: 'Today',      val: 'today' },
+                  { label: 'This week',  val: 'week'  },
+                  { label: 'This month', val: 'month' },
+                ].map(({ label, val }) => {
+                  const active = dateFilter === val && !(val === null && dateFilter && dateFilter.length === 10)
+                  return (
+                    <button key={label} onClick={() => setDateFilter(val)}
+                      style={{
+                        fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.75rem',
+                        padding: '4px 13px', borderRadius: '20px', cursor: 'pointer',
+                        transition: 'all 0.15s',
+                        background: active ? 'var(--flz-text)' : 'transparent',
+                        color:      active ? 'var(--flz-bg)'   : 'var(--flz-text-muted)',
+                        border: `1px solid ${active ? 'var(--flz-text)' : 'var(--flz-border)'}`,
+                      }}
+                      onMouseEnter={e => { if (!active) { e.currentTarget.style.borderColor = 'var(--flz-text)'; e.currentTarget.style.color = 'var(--flz-text)' } }}
+                      onMouseLeave={e => { if (!active) { e.currentTarget.style.borderColor = 'var(--flz-border)'; e.currentTarget.style.color = 'var(--flz-text-muted)' } }}
+                    >{label}</button>
+                  )
+                })}
+                {/* Specific date selected via calendar */}
+                {dateFilter && dateFilter.length === 10 && (
+                  <button onClick={() => setDateFilter(null)}
+                    style={{
+                      fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.75rem',
+                      padding: '4px 13px', borderRadius: '20px', cursor: 'pointer',
+                      background: 'var(--flz-text)', color: 'var(--flz-bg)',
+                      border: '1px solid var(--flz-text)', transition: 'all 0.15s',
+                    }}
+                  >
+                    {new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(dateFilter + 'T12:00:00'))} ×
+                  </button>
+                )}
+              </div>
+
+              {/* Count + divider */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--flz-border-soft)', paddingTop: '4px', marginBottom: '0' }}>
+                <span style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.72rem', color: 'var(--flz-text-muted)', padding: '10px 0' }}>
+                  {filteredEntries.length} {filteredEntries.length === 1 ? 'assessment' : 'assessments'}
+                  {dateFilter === 'today' ? ' today'
+                    : dateFilter === 'week'  ? ' this week'
+                    : dateFilter === 'month' ? ' this month'
+                    : dateFilter && dateFilter.length === 10
+                      ? ` on ${new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(dateFilter + 'T12:00:00'))}`
+                      : ''}
+                </span>
+              </div>
+
               {filteredEntries.length === 0
-                ? <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.875rem', color: 'var(--flz-text-muted)', paddingTop: '24px' }}>No entries match this filter.</p>
+                ? <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '0.875rem', color: 'var(--flz-text-muted)', paddingTop: '20px' }}>No assessments match this filter.</p>
                 : filteredEntries.map((entry, i) => <EntryRow key={entry.id} entry={entry} index={i} onSelect={onSelectEntry} />)
               }
             </motion.div>
