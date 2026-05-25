@@ -64,6 +64,31 @@ export default function App() {
     localStorage.setItem('flz-assessments', JSON.stringify({ date: today, count: next }))
   }
 
+  // ── Header fade on scroll (non-home screens) ────────────────────────────
+  const [headerVisible, setHeaderVisible] = useState(true)
+  const lastScrollY = useRef(0)
+
+  useEffect(() => {
+    // Use capture so we catch scroll events from any fixed child container
+    function onScroll(e) {
+      const el = e.target
+      if (!el || el === document) return
+      const y = el.scrollTop ?? 0
+      const delta = y - lastScrollY.current
+      lastScrollY.current = y
+      if (screenRef.current === 'onboarding') { setHeaderVisible(true); return }
+      if (delta > 4 && y > 60) setHeaderVisible(false)
+      else if (delta < -4 || y < 10) setHeaderVisible(true)
+    }
+    document.addEventListener('scroll', onScroll, true)
+    return () => document.removeEventListener('scroll', onScroll, true)
+  }, [])
+
+  // Always show header on home screen
+  useEffect(() => {
+    if (screen === 'onboarding') { setHeaderVisible(true); lastScrollY.current = 0 }
+  }, [screen])
+
   // ── Core flow state ──────────────────────────────────────────────────────
   const [screen, setScreen]         = useState('onboarding')
   const [navHistory, setNavHistory] = useState([])
@@ -334,8 +359,13 @@ export default function App() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--flz-bg)', transition: 'background 0.35s ease' }}>
       <PolkaDotBackground />
-      <Logo onReset={handleReset} dark={dark} />
-      <DarkModeToggle dark={dark} onToggle={() => setDark(d => !d)} />
+      <div style={{
+        opacity: headerVisible ? 1 : 0,
+        transition: 'opacity 0.3s ease',
+        pointerEvents: headerVisible ? 'auto' : 'none',
+      }}>
+        <Logo onReset={handleReset} dark={dark} />
+        <DarkModeToggle dark={dark} onToggle={() => setDark(d => !d)} />
       <ProfileIcon
         user={user}
         onSignIn={handleSignInClick}
@@ -346,6 +376,7 @@ export default function App() {
         onUpgrade={handleUpgradeClick}
         isPro={isPro}
       />
+      </div>
 
       <AnimatePresence mode="wait">
         {screen === 'onboarding' && (
