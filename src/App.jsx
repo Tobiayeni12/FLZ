@@ -338,7 +338,7 @@ export default function App() {
         {screen === 'onboarding' && (
           <motion.div key={`onboarding-${resetKey}`}
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }} style={{ position: 'fixed', inset: 0 }}
+            transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }} style={{ position: 'fixed', inset: 0 }} className="safe-screen"
           >
             <OnboardingScreen
               onSubmit={handleSubmit}
@@ -356,7 +356,7 @@ export default function App() {
         {screen === 'thinking' && (
           <motion.div key="thinking"
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }} style={{ position: 'fixed', inset: 0 }}
+            transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }} style={{ position: 'fixed', inset: 0 }} className="safe-screen"
           >
             <ThinkingScreen input={userInput} />
           </motion.div>
@@ -384,7 +384,7 @@ export default function App() {
         {screen === 'auth' && (
           <motion.div key="auth"
             initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 24 }}
-            transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }} style={{ position: 'fixed', inset: 0 }}
+            transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }} style={{ position: 'fixed', inset: 0 }} className="safe-screen"
           >
             <AuthScreen onBack={goBack} />
           </motion.div>
@@ -441,7 +441,7 @@ export default function App() {
         {screen === 'upgrade' && (
           <motion.div key="upgrade"
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
-            transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }} style={{ position: 'fixed', inset: 0 }}
+            transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }} style={{ position: 'fixed', inset: 0 }} className="safe-screen"
           >
             <UpgradeScreen
               user={user}
