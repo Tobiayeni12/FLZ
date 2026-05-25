@@ -71,7 +71,7 @@ export default function App() {
   }
 
   // ── Core flow state ──────────────────────────────────────────────────────
-  const [screen, setScreen]         = useState('onboarding')
+  const [screen, setScreen]         = useState(() => sessionStorage.getItem('flz-screen') || 'onboarding')
   const [navHistory, setNavHistory] = useState([])
   const [resetKey, setResetKey]     = useState(0)
   const [userInput, setUserInput]   = useState('')
@@ -140,6 +140,15 @@ export default function App() {
       })
   }, [user])
 
+  // ── Guard: if auth loaded with no user, don't stay on protected screens ──
+  const PROTECTED = ['history', 'settings', 'journal', 'upgrade']
+  useEffect(() => {
+    if (!authLoading && !user && PROTECTED.includes(screen)) {
+      sessionStorage.removeItem('flz-screen')
+      setScreen('onboarding')
+    }
+  }, [authLoading, user])
+
   // ── Detect post-Stripe redirect (?upgraded=true) ─────────────────────────
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -156,7 +165,10 @@ export default function App() {
   const screenRef                     = useRef('onboarding')
 
   useEffect(() => { pendingEntryRef.current = pendingEntry }, [pendingEntry])
-  useEffect(() => { screenRef.current = screen }, [screen])
+  useEffect(() => {
+    screenRef.current = screen
+    sessionStorage.setItem('flz-screen', screen)
+  }, [screen])
 
   // ── Set status bar on native launch ─────────────────────────────────────
   useEffect(() => { setNativeStatusBar(dark) }, [])
@@ -196,6 +208,7 @@ export default function App() {
       }
 
       if (event === 'SIGNED_OUT') {
+        sessionStorage.removeItem('flz-screen')
         setScreen('onboarding')
         setNavHistory([])
         setResetKey(k => k + 1)
