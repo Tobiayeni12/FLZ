@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { Capacitor } from '@capacitor/core'
-import { Browser } from '@capacitor/browser'
 
 const EASE_CALM = [0.25, 0.46, 0.45, 0.94]
 
@@ -56,6 +55,7 @@ export default function AuthScreen({ onBack }) {
     })
 
     if (isNative && data?.url) {
+      const { Browser } = await import('@capacitor/browser')
       await Browser.open({ url: data.url })
     }
   }

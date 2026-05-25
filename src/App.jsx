@@ -2,9 +2,11 @@ import { useState, useEffect, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { supabase } from './lib/supabase'
 import { Capacitor } from '@capacitor/core'
-import { Browser } from '@capacitor/browser'
-import { App as CapApp } from '@capacitor/app'
-// StatusBar imported dynamically to avoid Vite circular-dep TDZ error
+
+// All Capacitor plugins imported dynamically — static imports cause
+// Vite TDZ circular-dep errors crashing the web bundle
+const getNativeBrowser  = () => import('@capacitor/browser').then(m => m.Browser)
+const getNativeApp      = () => import('@capacitor/app').then(m => m.App)
 const setNativeStatusBar = async (isDark) => {
   if (!Capacitor.isNativePlatform()) return
   try {
@@ -204,9 +206,9 @@ export default function App() {
 
     const handleUrl = async ({ url }) => {
       if (url?.startsWith('com.flz.app://auth/callback')) {
+        const Browser = await getNativeBrowser()
         await Browser.close()
         const urlObj = new URL(url)
-        // Extract tokens from hash or search params
         const params = new URLSearchParams(
           urlObj.hash ? urlObj.hash.substring(1) : urlObj.search
         )
@@ -215,14 +217,17 @@ export default function App() {
         if (accessToken) {
           await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
         } else {
-          // PKCE flow — let Supabase exchange the code
           await supabase.auth.exchangeCodeForSession(urlObj.search)
         }
       }
     }
 
-    CapApp.addListener('appUrlOpen', handleUrl)
-    return () => { CapApp.removeAllListeners() }
+    let cleanup = () => {}
+    getNativeApp().then(CapApp => {
+      CapApp.addListener('appUrlOpen', handleUrl)
+      cleanup = () => CapApp.removeAllListeners()
+    })
+    return () => cleanup()
   }, [])
 
   // ── Auto-save pending entry after guest signs in ─────────────────────────
