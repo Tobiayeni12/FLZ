@@ -84,13 +84,21 @@ export default function App() {
   const lastElemY  = useRef(0)
 
   useEffect(() => {
+    let stopTimer = null
+
     function check(y, lastRef) {
       if (screenRef.current === 'onboarding') { setHeaderVisible(true); lastRef.current = y; return }
       const delta = y - lastRef.current
       lastRef.current = y
-      if (delta > 6 && y > 80)   setHeaderVisible(false)  // scrolling down
-      if (delta < 0  || y < 40)  setHeaderVisible(true)   // any upward movement
+
+      if (delta > 6 && y > 80) setHeaderVisible(false) // scrolling down
+      if (delta < 0 || y < 40) setHeaderVisible(true)  // any upward movement
+
+      // Failsafe: always restore header 1.5s after scrolling stops
+      clearTimeout(stopTimer)
+      stopTimer = setTimeout(() => setHeaderVisible(true), 1500)
     }
+
     function onWin()  { check(window.scrollY, lastWinY) }
     function onElem(e) {
       const el = e.target
@@ -102,6 +110,7 @@ export default function App() {
     return () => {
       window.removeEventListener('scroll', onWin)
       document.removeEventListener('scroll', onElem, true)
+      clearTimeout(stopTimer)
     }
   }, [])
 
