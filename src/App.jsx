@@ -70,12 +70,19 @@ export default function App() {
     localStorage.setItem('flz-assessments', JSON.stringify({ date: today, count: next }))
   }
 
+  // ── Core flow state ──────────────────────────────────────────────────────
+  const [screen, setScreen]         = useState('onboarding')
+  const [navHistory, setNavHistory] = useState([])
+  const [resetKey, setResetKey]     = useState(0)
+  const [userInput, setUserInput]   = useState('')
+  const [analysis, setAnalysis]     = useState(null)
+  const [error, setError]           = useState(null)
+
   // ── Header fade on scroll (non-home screens) ────────────────────────────
   const [headerVisible, setHeaderVisible] = useState(true)
   const lastScrollY = useRef(0)
 
   useEffect(() => {
-    // Use capture so we catch scroll events from any fixed child container
     function onScroll(e) {
       const el = e.target
       if (!el || el === document) return
@@ -90,18 +97,9 @@ export default function App() {
     return () => document.removeEventListener('scroll', onScroll, true)
   }, [])
 
-  // Always show header on home screen
   useEffect(() => {
     if (screen === 'onboarding') { setHeaderVisible(true); lastScrollY.current = 0 }
   }, [screen])
-
-  // ── Core flow state ──────────────────────────────────────────────────────
-  const [screen, setScreen]         = useState('onboarding')
-  const [navHistory, setNavHistory] = useState([])
-  const [resetKey, setResetKey]     = useState(0)
-  const [userInput, setUserInput]   = useState('')
-  const [analysis, setAnalysis]     = useState(null)
-  const [error, setError]           = useState(null)
 
   // Navigate forward — remembers where we came from
   function navigate(to) {
