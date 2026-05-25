@@ -29,10 +29,10 @@ html {
   padding-right: env(safe-area-inset-right, 0px) !important;
 }
 
-/* Prevent full-page rubber-band scroll on iOS WebView */
+/* Allow natural iOS bounce — background fills the bounce zone seamlessly */
 body {
-  overscroll-behavior: none;
-  -webkit-overflow-scrolling: touch;
+  background: var(--flz-bg);
+  overscroll-behavior-y: auto;
 }
 
 /* ── Design tokens ───────────────────────────────────────────────── */
@@ -69,7 +69,6 @@ html.dark {
 }
 
 body {
-  background: var(--flz-bg);
   color: var(--flz-text);
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
