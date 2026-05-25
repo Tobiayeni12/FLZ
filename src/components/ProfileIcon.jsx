@@ -35,7 +35,7 @@ export default function ProfileIcon({ user, onSignIn, onHistory, onJournal, onSe
   return (
     <motion.div
       ref={ref}
-      style={{ position: 'fixed', top: 'calc(env(safe-area-inset-top, 0px) + 15px)', right: '24px', zIndex: 20 }}
+      style={{ position: 'fixed', top: 'max(env(safe-area-inset-top, 0px) + 12px, 16px)', right: '24px', zIndex: 20 }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 1.2, ease: 'easeOut', delay: 0.3 }}

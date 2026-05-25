@@ -80,34 +80,36 @@ export default function App() {
 
   // ── Header fade on scroll (non-home screens) ────────────────────────────
   const [headerVisible, setHeaderVisible] = useState(true)
-  const lastScrollY = useRef(0)
+  const lastWinY   = useRef(0)
+  const lastElemY  = useRef(0)
 
   useEffect(() => {
-    function handleScroll(y) {
-      const delta = y - lastScrollY.current
-      lastScrollY.current = y
-      if (screenRef.current === 'onboarding') { setHeaderVisible(true); return }
-      if (delta > 4 && y > 60) setHeaderVisible(false)
-      else if (delta < -4 || y < 10) setHeaderVisible(true)
+    function check(y, lastRef) {
+      if (screenRef.current === 'onboarding') { setHeaderVisible(true); lastRef.current = y; return }
+      const delta = y - lastRef.current
+      lastRef.current = y
+      if (delta > 6 && y > 80)   setHeaderVisible(false)  // scrolling down
+      if (delta < 0  || y < 40)  setHeaderVisible(true)   // any upward movement
     }
-    // Window scroll (history/settings/journal pages that scroll the page)
-    function onWindowScroll() { handleScroll(window.scrollY) }
-    // Element scroll (fixed containers with internal overflow-y scroll)
-    function onElementScroll(e) {
+    function onWin()  { check(window.scrollY, lastWinY) }
+    function onElem(e) {
       const el = e.target
       if (!el || el === document || el === document.documentElement) return
-      handleScroll(el.scrollTop ?? 0)
+      check(el.scrollTop ?? 0, lastElemY)
     }
-    window.addEventListener('scroll', onWindowScroll, { passive: true })
-    document.addEventListener('scroll', onElementScroll, true)
+    window.addEventListener('scroll', onWin,  { passive: true })
+    document.addEventListener('scroll', onElem, true)
     return () => {
-      window.removeEventListener('scroll', onWindowScroll)
-      document.removeEventListener('scroll', onElementScroll, true)
+      window.removeEventListener('scroll', onWin)
+      document.removeEventListener('scroll', onElem, true)
     }
   }, [])
 
+  // Reset when navigating to any screen
   useEffect(() => {
-    if (screen === 'onboarding') { setHeaderVisible(true); lastScrollY.current = 0 }
+    setHeaderVisible(true)
+    lastWinY.current  = 0
+    lastElemY.current = 0
   }, [screen])
 
   // Navigate forward — remembers where we came from
