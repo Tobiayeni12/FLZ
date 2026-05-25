@@ -7,7 +7,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // Match window background to app theme so overscroll bounce areas
+        // don't show a black/white gap — uses iOS dark mode trait
+        let isDark = UITraitCollection.current.userInterfaceStyle == .dark
+        window?.backgroundColor = isDark
+            ? UIColor(red: 0.047, green: 0.047, blue: 0.047, alpha: 1) // #0c0c0c
+            : UIColor.white
         return true
     }
 
