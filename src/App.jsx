@@ -83,18 +83,27 @@ export default function App() {
   const lastScrollY = useRef(0)
 
   useEffect(() => {
-    function onScroll(e) {
-      const el = e.target
-      if (!el || el === document) return
-      const y = el.scrollTop ?? 0
+    function handleScroll(y) {
       const delta = y - lastScrollY.current
       lastScrollY.current = y
       if (screenRef.current === 'onboarding') { setHeaderVisible(true); return }
       if (delta > 4 && y > 60) setHeaderVisible(false)
       else if (delta < -4 || y < 10) setHeaderVisible(true)
     }
-    document.addEventListener('scroll', onScroll, true)
-    return () => document.removeEventListener('scroll', onScroll, true)
+    // Window scroll (history/settings/journal pages that scroll the page)
+    function onWindowScroll() { handleScroll(window.scrollY) }
+    // Element scroll (fixed containers with internal overflow-y scroll)
+    function onElementScroll(e) {
+      const el = e.target
+      if (!el || el === document || el === document.documentElement) return
+      handleScroll(el.scrollTop ?? 0)
+    }
+    window.addEventListener('scroll', onWindowScroll, { passive: true })
+    document.addEventListener('scroll', onElementScroll, true)
+    return () => {
+      window.removeEventListener('scroll', onWindowScroll)
+      document.removeEventListener('scroll', onElementScroll, true)
+    }
   }, [])
 
   useEffect(() => {
