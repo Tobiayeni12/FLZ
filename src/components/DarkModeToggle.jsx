@@ -39,7 +39,7 @@ export default function DarkModeToggle({ dark, onToggle }) {
       transition={{ duration: 1.2, ease: 'easeOut', delay: 0.3 }}
       style={{
         position: 'fixed',
-        top: '15px',
+        top: 'calc(env(safe-area-inset-top, 0px) + 15px)',
         right: '76px',
         zIndex: 20,
         width: '44px',
