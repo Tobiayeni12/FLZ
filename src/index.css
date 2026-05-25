@@ -12,6 +12,11 @@ html, body, #root {
   padding: 0;
 }
 
+/* Fill safe-area gutters (top/bottom notch gaps) with the app background */
+html {
+  background: var(--flz-bg);
+}
+
 /* ── iOS safe areas (notch / Dynamic Island / home indicator) ────── */
 /* Applied to fixed full-screen containers so content clears the notch */
 .safe-screen {

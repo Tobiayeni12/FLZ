@@ -4,6 +4,7 @@ import { supabase } from './lib/supabase'
 import { Capacitor } from '@capacitor/core'
 import { Browser } from '@capacitor/browser'
 import { App as CapApp } from '@capacitor/app'
+import { StatusBar, Style } from '@capacitor/status-bar'
 
 import OnboardingScreen  from './components/OnboardingScreen'
 import ThinkingScreen    from './components/ThinkingScreen'
@@ -25,6 +26,11 @@ export default function App() {
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark)
     localStorage.setItem('flz-dark', dark)
+    // Sync iOS status bar style with dark mode
+    if (Capacitor.isNativePlatform()) {
+      StatusBar.setStyle({ style: dark ? Style.Dark : Style.Light }).catch(() => {})
+      StatusBar.setBackgroundColor({ color: dark ? '#0c0c0c' : '#ffffff' }).catch(() => {})
+    }
   }, [dark])
 
   // ── User name — session only for guests, saved to Supabase for logged-in ─
@@ -113,6 +119,13 @@ export default function App() {
 
   useEffect(() => { pendingEntryRef.current = pendingEntry }, [pendingEntry])
   useEffect(() => { screenRef.current = screen }, [screen])
+
+  // ── Set status bar on native launch ─────────────────────────────────────
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return
+    StatusBar.setStyle({ style: dark ? Style.Dark : Style.Light }).catch(() => {})
+    StatusBar.setBackgroundColor({ color: dark ? '#0c0c0c' : '#ffffff' }).catch(() => {})
+  }, [])
 
   // ── Boot: check session + listen for auth changes ────────────────────────
   useEffect(() => {
